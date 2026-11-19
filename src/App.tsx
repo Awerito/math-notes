@@ -1,3 +1,15 @@
+import { layoutNode, parseEquation } from "wyrm-math";
+import { EquationView } from "./solver/EquationView.tsx";
+
+const SAMPLES = [
+  "2x + 3 = 11",
+  "3(x + 2) = 12",
+  "x^2 = 3x",
+  "sqrt(x + 1) = 3",
+  "x^2/x = (3x)/x",
+  "(sqrt(x + 1))^2 = 3^2 - 1/2",
+];
+
 function App() {
   return (
     <main className="mx-auto max-w-3xl px-6 pt-16 pb-24">
@@ -7,8 +19,14 @@ function App() {
         Solver
       </h2>
 
-      <section className="border-[3px] border-ink bg-surface p-6 text-center shadow-hard">
-        <p className="text-muted">The interactive solver goes here</p>
+      <section className="flex flex-col items-center border-[3px] border-ink bg-surface p-6 shadow-hard">
+        {SAMPLES.map((source) => (
+          <EquationView
+            key={source}
+            layout={layoutNode(parseEquation(source))}
+            size={36}
+          />
+        ))}
       </section>
     </main>
   );
