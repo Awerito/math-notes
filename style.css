@@ -1,0 +1,183 @@
+:root {
+  --bg: #111;
+  --surface: #1b1b1b;
+  --ink: #f5f0e8;
+  --muted: #bbb;
+  --line: #444;
+  --pink: #ff5fa2;
+  --green: #5fe08a;
+  --green-bg: #0c2415;
+  --mono: "JetBrainsMono Nerd Font", monospace;
+  --border: 3px solid var(--ink);
+  --shadow: 5px 5px 0 var(--ink);
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.6 var(--mono);
+}
+
+body {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 6rem;
+}
+
+/* ---------- Headings ---------- */
+
+/* Document title, from the YAML front matter */
+h1.title {
+  display: block;
+  font: 700 2.2rem/1.05 var(--mono);
+  margin: 0 0 3rem;
+  padding: 0;
+  border: 0;
+}
+
+h1 {
+  display: inline-block;
+  font: 700 1.25rem/1.2 var(--mono);
+  margin: 3.5rem 0 1.6rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 4px solid var(--pink);
+}
+
+h2 {
+  font: 700 1.05rem/1.3 var(--mono);
+  margin: 2.5rem 0 1rem;
+}
+
+h3 {
+  font: 400 0.95rem/1.4 var(--mono);
+  color: var(--muted);
+  margin: 0 0 1.5rem;
+}
+
+/* ---------- Text ---------- */
+
+hr {
+  border: 0;
+  border-top: var(--border);
+  margin: 3.5rem 0;
+}
+
+code {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 0.05em 0.3em;
+}
+
+/* ---------- Math ---------- */
+
+/* Wide equations scroll inside their own line */
+.math.display {
+  display: block;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* \boxed{...} results. KaTeX draws the box as an overlay on top of the
+   formula and sets its width inline, so only the color can be styled.
+   The .math prefix outweighs KaTeX's own .katex .fbox rule, which loads later */
+.math .katex .fbox {
+  border-color: var(--green);
+}
+
+/* ---------- Tables ---------- */
+
+table {
+  width: 100%;
+  margin: 1.5rem 0 2.5rem;
+  /* separate keeps cell borders inside the table frame; with collapse the
+     thicker header rule would win over the frame and overrun its sides */
+  border-collapse: separate;
+  border-spacing: 0;
+  border: var(--border);
+  box-shadow: var(--shadow);
+  background: var(--surface);
+}
+
+th {
+  font: 700 0.85rem var(--mono);
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--ink);
+  background: #333;
+  padding: 0.6rem 1rem;
+  border-bottom: 4px solid var(--pink);
+}
+
+/* Column divider as an inset shadow so it stops above the pink rule */
+th + th {
+  box-shadow: inset 2px 0 0 var(--bg);
+}
+
+td {
+  padding: 0.6rem 1rem;
+  border-bottom: 2px solid var(--line);
+}
+
+td + td {
+  border-left: 2px solid var(--line);
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+/* ---------- Derivation card ---------- */
+
+/* Card holding one derivation, everything centered */
+.flow {
+  background: var(--surface);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  padding: 1.8rem 1.5rem 1.5rem;
+  margin: 0 0 2.5rem;
+  text-align: center;
+}
+
+.flow p {
+  margin: 0.3rem 0;
+}
+
+/* Step titles: paragraphs written as **bold** */
+.flow > p:has(> strong) {
+  font-size: 1.1rem;
+}
+
+/* Step notes: any paragraph that is neither a title nor a display equation */
+.flow > p:not(:has(strong, .math.display)) {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+}
+
+/* Arrow leading into each note, generated, never typed in the markdown */
+.flow > p:not(:has(strong, .math.display))::before {
+  content: "↓";
+  display: block;
+  font: 700 1.3rem var(--mono);
+  color: var(--pink);
+  margin: 0.3rem 0;
+}
+
+/* Highlighted final result */
+.sol {
+  background: var(--green-bg);
+  border: 3px solid var(--green);
+  padding: 1.2rem 1rem 0.8rem;
+  margin-top: 0.5rem;
+}
+
+/* First line of the result block becomes the green label */
+.sol > p:first-child {
+  display: inline-block;
+  font: 700 0.7rem var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--green);
+  padding: 0.25rem 0.7rem;
+}
