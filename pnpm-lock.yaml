@@ -20,6 +20,9 @@ importers:
       tailwindcss:
         specifier: ^4.3.5
         version: 4.3.5
+      wyrm-math:
+        specifier: 0.11.0
+        version: 0.11.0
     devDependencies:
       '@types/node':
         specifier: ^24.19.2
@@ -773,6 +776,9 @@ packages:
       yaml:
         optional: true
 
+  wyrm-math@0.11.0:
+    resolution: {integrity: sha512-6B7Cgk6OeQUKKCTBY4zTxMZEx1OTtCxTRxfu/4KYAoa630UkHlH3Hh65Evr8H/BiIrGuMlaGj5iTvgw5aE12Vw==}
+
 snapshots:
 
   '@emnapi/core@2.0.0-beta.2':
@@ -1268,3 +1274,5 @@ snapshots:
       '@types/node': 24.19.2
       fsevents: 2.3.3
       jiti: 2.7.0
+
+  wyrm-math@0.11.0: {}
