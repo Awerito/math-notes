@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@cortex-js/compute-engine':
+        specifier: 0.193.0
+        version: 0.193.0
       '@tailwindcss/vite':
         specifier: ^4.3.5
         version: 4.3.5(vite@8.3.8(@types/node@24.19.2)(jiti@2.7.0))
@@ -50,6 +53,14 @@ importers:
         version: 8.3.8(@types/node@24.19.2)(jiti@2.7.0)
 
 packages:
+
+  '@arnog/colors@0.7.3':
+    resolution: {integrity: sha512-D7h3f498cu68+pI54eNl1UIm5xbs1uX5ggBTuFpLs3YQ17lqlWAmJ6d+tuvyLvJEzciN2YYR6D+9K8NfBGJGkQ==}
+
+  '@cortex-js/compute-engine@0.193.0':
+    resolution: {integrity: sha512-skKUsRMdqGG8CesRWdQJ8wU2uNrxUE/vu5+3+CVUpruVcqqJ17a3AGL+TMu/dB70bONXMjqDQ801H9Mp/AoMjg==}
+    engines: {node: '>=26.13.0', npm: '>=10.5.0'}
+    hasBin: true
 
   '@emnapi/core@2.0.0-beta.2':
     resolution: {integrity: sha512-MzCVoWtcg4Pm2B3je5mMvYMvj3MmBKw+fU7vbsJc9/iT8ip6/eYIHo/Dsm/mr+wsHB6SEyJDuxB09Yy6r/8+4A==}
@@ -559,6 +570,9 @@ packages:
     resolution: {integrity: sha512-cgnQ88TRrWcC7pVq46RzJVRMktu3W2RcbnoidnfBsl1bmDCBwJS/udcIZpKoCrbAYYaCqsz1yZCVIgbIaU3ddQ==}
     engines: {node: '>=22.12.0'}
 
+  complex.js@2.4.3:
+    resolution: {integrity: sha512-UrQVSUur14tNX6tiP4y8T4w4FeJAX3bi2cIv0pu/DTLFNxoq7z2Yh83Vfzztj6Px3X/lubqQ9IrPp7Bpn6p4MQ==}
+
   csstype@3.2.4:
     resolution: {integrity: sha512-PoKaoPzQapnEoqUSnHx1u6W6ku8CVEgKsnpmmzU3m1nwkidpPBQ8V/Zq2+bWNrsOKoKLwTGdbx6xF7BXP1zLVQ==}
 
@@ -791,6 +805,13 @@ packages:
     resolution: {integrity: sha512-6B7Cgk6OeQUKKCTBY4zTxMZEx1OTtCxTRxfu/4KYAoa630UkHlH3Hh65Evr8H/BiIrGuMlaGj5iTvgw5aE12Vw==}
 
 snapshots:
+
+  '@arnog/colors@0.7.3': {}
+
+  '@cortex-js/compute-engine@0.193.0':
+    dependencies:
+      '@arnog/colors': 0.7.3
+      complex.js: 2.4.3
 
   '@emnapi/core@2.0.0-beta.2':
     dependencies:
@@ -1098,6 +1119,8 @@ snapshots:
       vite: 8.3.8(@types/node@24.19.2)(jiti@2.7.0)
 
   commander@15.1.0: {}
+
+  complex.js@2.4.3: {}
 
   csstype@3.2.4: {}
 
