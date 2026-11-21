@@ -68,6 +68,74 @@ code {
   padding: 0.05em 0.3em;
 }
 
+/* ---------- Lists ---------- */
+
+li::marker {
+  color: var(--pink);
+  font-weight: 700;
+}
+
+/* Room for stacked fractions in consecutive items */
+li {
+  margin: 0.9rem 0;
+}
+
+/* Hints nested under an exercise */
+li li {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin: 0.3rem 0;
+}
+
+/* ---------- Folding ---------- */
+
+summary {
+  cursor: pointer;
+  /* hides the native triangle */
+  list-style: none;
+}
+
+/* WebKit draws the triangle with its own pseudo-element */
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Unit title: square marker before the heading */
+summary:has(h1)::before {
+  content: "+";
+  display: inline-block;
+  width: 1.6rem;
+  margin-right: 0.8rem;
+  font: 700 1.25rem/1.6rem var(--mono);
+  text-align: center;
+  color: var(--bg);
+  background: var(--pink);
+}
+
+details[open] > summary:has(h1)::before {
+  content: "−";
+}
+
+/* Answer card: a fold nested inside a unit */
+details details {
+  background: var(--surface);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.2rem;
+  margin: 1.5rem 0 2.5rem;
+}
+
+/* Same green label as .sol */
+details details > summary {
+  display: inline-block;
+  font: 700 0.7rem var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--green);
+  padding: 0.25rem 0.7rem;
+}
+
 /* ---------- Math ---------- */
 
 /* Wide equations scroll inside their own line */

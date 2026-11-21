@@ -1137,130 +1137,333 @@ $$
 <details>
 <summary>
 
-# 6. FOURIER SERIES
+# 6. FOURIER TRANSFORM
 
 </summary>
 
-## 6.1. General idea
-
-A periodic function can be represented as a combination of sines and cosines.
-
-For a function of period $2L$:
+## 6.1. Definition
 
 $$
 \boxed{
-f(x)\sim
-\frac{a_0}{2}
-+
-\sum_{n=1}^{\infty}
-\left[
-a_n\cos\left(\frac{n\pi x}{L}\right)
-+
-b_n\sin\left(\frac{n\pi x}{L}\right)
-\right]
+\mathcal F\{f(t)\}=F(\omega)
+=
+\int_{-\infty}^{\infty} f(t)e^{-i\omega t}dt
 }
 $$
 
-## 6.2. Fourier coefficients
+The transform turns a function of time into a function of the frequency $\omega$: $F(\omega)$ says how much of the oscillation $e^{i\omega t}$ is inside $f(t)$.
 
-Constant term:
+It is the same idea as Laplace with two changes: the exponent is $-i\omega t$ instead of $-st$, and the integral covers all time instead of starting at $0$.
+
+Inverse transform:
 
 $$
 \boxed{
-a_0=\frac{1}{L}\int_{-L}^{L}f(x)dx
+f(t)=\frac{1}{2\pi}\int_{-\infty}^{\infty}F(\omega)e^{i\omega t}d\omega
 }
 $$
 
-Cosine coefficients:
+Euler's formula is the tool that turns complex exponentials into sines and cosines:
 
 $$
-\boxed{
-a_n=\frac{1}{L}\int_{-L}^{L}
-f(x)\cos\left(\frac{n\pi x}{L}\right)dx
-}
-$$
-
-Sine coefficients:
-
-$$
-\boxed{
-b_n=\frac{1}{L}\int_{-L}^{L}
-f(x)\sin\left(\frac{n\pi x}{L}\right)dx
-}
-$$
-
-## 6.3. Symmetry
-
-**Even function**
-
-$$
-f(-x)=f(x)
-$$
-
-- Only cosines appear.
-- $b_n=0$.
-
-$$
-a_n=\frac{2}{L}\int_0^L
-f(x)\cos\left(\frac{n\pi x}{L}\right)dx
-$$
-
-**Odd function**
-
-$$
-f(-x)=-f(x)
-$$
-
-- Only sines appear.
-- $a_0=a_n=0$.
-
-$$
-b_n=\frac{2}{L}\int_0^L
-f(x)\sin\left(\frac{n\pi x}{L}\right)dx
-$$
-
-## 6.4. Half-range series
-
-For a function defined on $0<x<L$:
-
-Sine series:
-
-$$
-f(x)\sim
-\sum_{n=1}^{\infty}
-b_n\sin\left(\frac{n\pi x}{L}\right)
+e^{i\theta}=\cos\theta+i\sin\theta
 $$
 
 $$
-b_n=\frac{2}{L}\int_0^L
-f(x)\sin\left(\frac{n\pi x}{L}\right)dx
+\cos\theta=\frac{e^{i\theta}+e^{-i\theta}}{2},
+\qquad
+\sin\theta=\frac{e^{i\theta}-e^{-i\theta}}{2i}
 $$
 
-Cosine series:
+## 6.2. Table of common transforms
+
+| Function | Transform |
+|---|---|
+| $e^{-at}u(t)$ | $\dfrac{1}{a+i\omega}$ |
+| $te^{-at}u(t)$ | $\dfrac{1}{(a+i\omega)^2}$ |
+| $e^{-a\lvert t\rvert}$ | $\dfrac{2a}{a^2+\omega^2}$ |
+| $e^{-at^2}$ | $\sqrt{\dfrac{\pi}{a}}\,e^{-\omega^2/(4a)}$ |
+| $\dfrac{1}{a^2+t^2}$ | $\dfrac{\pi}{a}e^{-a\lvert\omega\rvert}$ |
+| $1$ for $\lvert t\rvert<a$, $0$ otherwise | $\dfrac{2\sin(a\omega)}{\omega}$ |
+| $\delta(t)$ | $1$ |
+| $\delta(t-a)$ | $e^{-ia\omega}$ |
+| $1$ | $2\pi\delta(\omega)$ |
+| $e^{iat}$ | $2\pi\delta(\omega-a)$ |
+| $\cos(at)$ | $\pi[\delta(\omega-a)+\delta(\omega+a)]$ |
+| $\sin(at)$ | $\dfrac{\pi}{i}[\delta(\omega-a)-\delta(\omega+a)]$ |
+| $u(t)$ | $\pi\delta(\omega)+\dfrac{1}{i\omega}$ |
+
+Here $u(t)$ is the unit step function and $\delta$ is the Dirac delta. The first six rows need $a>0$.
+
+How to read the table: what is short in time is wide in frequency, and the other way around. An instant impulse $\delta(t)$ contains every frequency equally, while a pure oscillation $\cos(at)$ contains only the frequencies $\pm a$.
+
+## 6.3. Important properties
+
+$F(\omega)$ and $G(\omega)$ are the transforms of $f(t)$ and $g(t)$.
+
+Linearity:
 
 $$
-f(x)\sim
-\frac{a_0}{2}+
-\sum_{n=1}^{\infty}
-a_n\cos\left(\frac{n\pi x}{L}\right)
+\mathcal F\{af+bg\}=aF(\omega)+bG(\omega)
+$$
+
+Time shift, a delay only multiplies by a complex exponential:
+
+$$
+\mathcal F\{f(t-a)\}=e^{-ia\omega}F(\omega)
+$$
+
+Frequency shift, multiplying by an oscillation moves the transform:
+
+$$
+\mathcal F\{e^{iat}f(t)\}=F(\omega-a)
+$$
+
+Scaling, compressing in time stretches in frequency:
+
+$$
+\mathcal F\{f(at)\}=\frac{1}{\lvert a\rvert}F\left(\frac{\omega}{a}\right)
+$$
+
+Derivative, each derivative becomes a multiplication by $i\omega$:
+
+$$
+\mathcal F\{f'\}=i\omega F(\omega)
 $$
 
 $$
-a_n=\frac{2}{L}\int_0^L
-f(x)\cos\left(\frac{n\pi x}{L}\right)dx
+\mathcal F\{f^{(n)}\}=(i\omega)^nF(\omega)
 $$
 
-## 6.5. Convergence
+Unlike Laplace, no initial conditions appear.
 
-At points where the function is continuous, the series converges to $f(x)$.
-
-At a jump discontinuity, it converges to the average of the one-sided limits:
+Multiplication by $t$:
 
 $$
-\boxed{
-\frac{f(x^-)+f(x^+)}{2}
-}
+\mathcal F\{tf(t)\}=iF'(\omega)
 $$
+
+Convolution, it becomes a plain product:
+
+$$
+(f*g)(t)=\int_{-\infty}^{\infty}f(\tau)g(t-\tau)d\tau
+$$
+
+$$
+\mathcal F\{f*g\}=F(\omega)G(\omega)
+$$
+
+Symmetry, every row of the table can be read backwards:
+
+$$
+\mathcal F\{F(t)\}=2\pi f(-\omega)
+$$
+
+## 6.4. Computing a transform from the definition
+
+::: flow
+**Worked example: decaying exponential**
+
+$$
+\displaystyle f(t)=e^{-2t}u(t)
+$$
+
+$u(t)$ is zero for negative $t$, so the integral starts at $0$:
+
+$$
+\displaystyle F(\omega)=\int_0^\infty e^{-2t}e^{-i\omega t}dt
+$$
+
+Join the exponentials:
+
+$$
+\displaystyle F(\omega)=\int_0^\infty e^{-(2+i\omega)t}dt
+$$
+
+Integrate like any exponential, treating $2+i\omega$ as a constant:
+
+$$
+\displaystyle F(\omega)=\left[-\frac{e^{-(2+i\omega)t}}{2+i\omega}\right]_0^\infty
+$$
+
+At infinity the exponential vanishes because of the $e^{-2t}$, and at $0$ it equals $1$.
+
+::: sol
+Transform
+
+$$
+F(\omega)=\frac{1}{2+i\omega}
+$$
+:::
+:::
+
+::: flow
+**Worked example: rectangular pulse**
+
+$$
+\displaystyle f(t)=1\ \text{for}\ \lvert t\rvert<1,\qquad f(t)=0\ \text{otherwise}
+$$
+
+The function is zero outside the pulse, so integrate only from $-1$ to $1$:
+
+$$
+\displaystyle F(\omega)=\int_{-1}^{1}e^{-i\omega t}dt
+$$
+
+Integrate the exponential:
+
+$$
+\displaystyle F(\omega)=\left[\frac{e^{-i\omega t}}{-i\omega}\right]_{-1}^{1}
+=\frac{e^{i\omega}-e^{-i\omega}}{i\omega}
+$$
+
+Use Euler: $e^{i\omega}-e^{-i\omega}=2i\sin\omega$.
+
+::: sol
+Transform
+
+$$
+F(\omega)=\frac{2\sin\omega}{\omega}
+$$
+:::
+:::
+
+## 6.5. Solving differential equations with Fourier
+
+The steps are the same as with Laplace: transform, solve the algebra, go back with the table.
+
+::: flow
+**Worked example**
+
+$$
+\displaystyle y'+3y=e^{-2t}u(t)
+$$
+
+Apply Fourier to both sides, with $y'\to i\omega Y$ and the right side from the table:
+
+$$
+\displaystyle i\omega Y+3Y=\frac{1}{2+i\omega}
+$$
+
+**Solve for the transform**
+
+$$
+\displaystyle Y(\omega)=\frac{1}{(2+i\omega)(3+i\omega)}
+$$
+
+Expand in partial fractions, treating $i\omega$ as a single variable like $s$:
+
+$$
+\displaystyle Y(\omega)=\frac{1}{2+i\omega}-\frac{1}{3+i\omega}
+$$
+
+Invert each term with $\dfrac{1}{a+i\omega}\to e^{-at}u(t)$.
+
+::: sol
+Solution
+
+$$
+y(t)=\left(e^{-2t}-e^{-3t}\right)u(t)
+$$
+:::
+:::
+
+Fourier has no place for initial conditions: it gives the solution that is zero before the input starts. For problems with initial conditions use Laplace.
+
+## 6.6. Practice
+
+The help shrinks level by level. Try each exercise before opening the answers.
+
+**Level 1: guided, from the definition**
+
+The setup is given, only the integral is left to you.
+
+1. $f(t)=e^{-3t}u(t)$
+    - $u(t)$ is zero for negative $t$, so $F(\omega)=\int_0^\infty e^{-3t}e^{-i\omega t}dt$.
+    - Join the exponentials into $e^{-(3+i\omega)t}$.
+    - Integrate. At infinity the exponential vanishes, at $0$ it equals $1$.
+2. $f(t)=e^{2t}u(-t)$
+    - $u(-t)$ is zero for positive $t$, so $F(\omega)=\int_{-\infty}^0 e^{2t}e^{-i\omega t}dt$.
+    - Join the exponentials into $e^{(2-i\omega)t}$.
+    - Integrate. At $-\infty$ the exponential vanishes, at $0$ it equals $1$.
+3. $f(t)=1$ for $0<t<2$, $0$ otherwise
+    - The function is zero outside the pulse, so $F(\omega)=\int_0^2 e^{-i\omega t}dt$.
+    - Integrate and evaluate at both ends.
+4. $f(t)=e^{-\lvert t\rvert}$
+    - Split at $0$, because $\lvert t\rvert=-t$ for negative $t$: $F(\omega)=\int_{-\infty}^0 e^{t}e^{-i\omega t}dt+\int_0^\infty e^{-t}e^{-i\omega t}dt$.
+    - Each integral works like exercises 1 and 2.
+    - Add the two fractions with a common denominator.
+
+<details>
+<summary>Answers, level 1</summary>
+
+1. $\dfrac{1}{3+i\omega}$
+2. $\dfrac{1}{2-i\omega}$
+3. $\dfrac{1-e^{-2i\omega}}{i\omega}$
+4. $\dfrac{2}{1+\omega^2}$
+
+</details>
+
+**Level 2: one hint each, table and properties**
+
+5. $f(t)=e^{-3(t-2)}u(t-2)$
+    - It is $e^{-3t}u(t)$ delayed by $2$: use the time shift.
+6. $f(t)=1$ for $\lvert t\rvert<3$, $0$ otherwise
+    - It is a row of the table.
+7. $f(t)=te^{-\lvert t\rvert}$
+    - Use multiplication by $t$ on the answer of exercise 4.
+8. $f(t)=e^{-2t}\cos(5t)u(t)$
+    - Write the cosine with Euler, then use the frequency shift on $e^{-2t}u(t)$.
+
+<details>
+<summary>Answers, level 2</summary>
+
+5. $\dfrac{e^{-2i\omega}}{3+i\omega}$
+6. $\dfrac{2\sin(3\omega)}{\omega}$
+7. $-\dfrac{4i\omega}{(1+\omega^2)^2}$
+8. $\dfrac{2+i\omega}{(2+i\omega)^2+25}$
+
+</details>
+
+**Level 3: one word, inverse transforms**
+
+Find $f(t)$.
+
+9. $F(\omega)=\dfrac{1}{4+i\omega}$ (table)
+10. $F(\omega)=\dfrac{6}{9+\omega^2}$ (table)
+11. $F(\omega)=\dfrac{e^{-3i\omega}}{1+i\omega}$ (time shift)
+12. $F(\omega)=\dfrac{1}{(1+i\omega)(4+i\omega)}$ (partial fractions)
+13. $F(\omega)=\dfrac{i\omega}{(2+i\omega)(3+i\omega)}$ (partial fractions)
+
+<details>
+<summary>Answers, level 3</summary>
+
+9. $e^{-4t}u(t)$
+10. $e^{-3\lvert t\rvert}$
+11. $e^{-(t-3)}u(t-3)$
+12. $\dfrac{1}{3}\left(e^{-t}-e^{-4t}\right)u(t)$
+13. $\left(3e^{-3t}-2e^{-2t}\right)u(t)$
+
+</details>
+
+**Level 4: no help**
+
+14. Solve $y'+2y=\delta(t)$
+15. Solve $y'+5y=e^{-2t}u(t)$
+16. Solve $y''+3y'+2y=\delta(t)$
+17. Compute the convolution of $e^{-t}u(t)$ and $e^{-2t}u(t)$ with the transform
+
+<details>
+<summary>Answers, level 4</summary>
+
+14. $y(t)=e^{-2t}u(t)$
+15. $y(t)=\dfrac{1}{3}\left(e^{-2t}-e^{-5t}\right)u(t)$
+16. $y(t)=\left(e^{-t}-e^{-2t}\right)u(t)$
+17. $\left(e^{-t}-e^{-2t}\right)u(t)$
+
+Exercises 16 and 17 give the same result: the solution of an equation with input $\delta(t)$ is that convolution, and both lead to $\dfrac{1}{(1+i\omega)(2+i\omega)}$.
+
+</details>
 
 </details>
 

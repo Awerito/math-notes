@@ -1,0 +1,3173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Differential Equations Exam Cheat Sheet</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="notes.css" />
+    <script
+      defer=""
+      src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"
+    ></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var mathElements = document.getElementsByClassName("math");
+        var macros = [];
+        for (var i = 0; i < mathElements.length; i++) {
+          var texText = mathElements[i].firstChild;
+          if (mathElements[i].tagName == "SPAN") {
+            katex.render(texText.data, mathElements[i], {
+              displayMode: mathElements[i].classList.contains("display"),
+              throwOnError: false,
+              macros: macros,
+              fleqn: false,
+            });
+          }
+        }
+      });
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css"
+    />
+  </head>
+  <body>
+    <header class="bar">
+      <a class="brand" href="#">Differential Equations Exam Cheat Sheet</a>
+      <nav class="topics">
+        <a href="#modeling-with-odes"><b>1</b> Modeling</a>
+        <a href="#laplace-transform"><b>2</b> Laplace</a>
+        <a href="#fourier-transform"><b>3</b> Fourier</a>
+        <a href="#fourier-for-pdes"><b>4</b> PDEs</a>
+        <a href="#ode-systems-in-python"><b>5</b> Python</a>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <aside class="toc">
+        <p class="toc-label">On this page</p>
+        <ol id="toc"></ol>
+      </aside>
+      <main>
+        <details>
+          <summary>
+            <h1 id="modeling-with-odes">1. MODELING WITH ODEs</h1>
+          </summary>
+          <h2 id="recipe">1.1. Recipe</h2>
+          <p>Every model in this section comes from one sentence:</p>
+          <p>
+            <span class="math display">
+              \boxed{\frac{d(\text{amount})}{dt}=\text{rate in}-\text{rate out}}
+            </span>
+          </p>
+          <ol type="1">
+            <li>
+              Name the unknown with its units:
+              <span class="math inline">x(t)</span> kg of salt,
+              <span class="math inline">P(t)</span> individuals,
+              <span class="math inline">[A](t)</span> mol/L.
+            </li>
+            <li>Write each rate in units of amount per time.</li>
+            <li>
+              Write the initial condition from the statement:
+              <span class="math inline">x(0)=x_0</span>.
+            </li>
+            <li>Check the units of every term match.</li>
+          </ol>
+          <p>
+            The answer to a “plantear” question is the equation plus its initial
+            condition, that is the IVP.
+          </p>
+          <h2 id="mixing-tanks">1.2. Mixing tanks</h2>
+          <p>
+            <strong>When it appears:</strong> brine or a pollutant enters a
+            tank, mixes instantly, and leaves.
+          </p>
+          <p>
+            <span class="math display">
+              \frac{dx}{dt}
+              =\underbrace{c_{in}\,r_{in}}_{\text{kg/L}\cdot\text{L/min}}
+              -\underbrace{\frac{x}{V(t)}\,r_{out}}_{\text{concentration}\cdot\text{L/min}}
+            </span>
+          </p>
+          <p>
+            <span class="math display"> V(t)=V_0+(r_{in}-r_{out})\,t </span>
+          </p>
+          <p>
+            If <span class="math inline">r_{in}=r_{out}</span> the volume stays
+            at <span class="math inline">V_0</span> and the equation is linear
+            with constant coefficients.
+          </p>
+          <div class="flow">
+            <p><strong>Worked example: one tank</strong></p>
+            <p>
+              A 100 L tank holds 10 kg of salt. Brine with 0.5 kg/L enters at 4
+              L/min and the mixture leaves at 4 L/min
+            </p>
+            <p>Rate in:</p>
+            <p>
+              <span class="math display">
+                \displaystyle 0.5\cdot4=2\ \text{kg/min}
+              </span>
+            </p>
+            <p>
+              Rate out, the concentration
+              <span class="math inline">x/100</span> times the flow:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle \frac{x}{100}\cdot4=0.04x\ \text{kg/min}
+              </span>
+            </p>
+            <p><strong>IVP</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle x&#39;=2-0.04x,\qquad x(0)=10
+              </span>
+            </p>
+            <p>
+              Linear, integrating factor
+              <span class="math inline">e^{0.04t}</span>, or Laplace.
+            </p>
+            <div class="sol">
+              <p>Solution</p>
+              <p><span class="math display"> x(t)=50-40e^{-0.04t} </span></p>
+              <p>
+                In the long run <span class="math inline">x\to50</span> kg,
+                which is <span class="math inline">0.5</span> kg/L times 100 L
+              </p>
+            </div>
+          </div>
+          <div class="flow">
+            <p><strong>Worked example: two tanks in series</strong></p>
+            <p>
+              Tanks A and B hold 100 L each. Pure water enters A at 2 L/min, A
+              pours into B at 2 L/min, B drains at 2 L/min. A starts with 50 kg
+              of salt, B with none
+            </p>
+            <p>Tank A only loses salt:</p>
+            <p>
+              <span class="math display">
+                \displaystyle x_1&#39;=-\frac{2}{100}x_1
+              </span>
+            </p>
+            <p>Tank B gains what A loses and drains its own:</p>
+            <p>
+              <span class="math display">
+                \displaystyle x_2&#39;=\frac{2}{100}x_1-\frac{2}{100}x_2
+              </span>
+            </p>
+            <div class="sol">
+              <p>IVP as a system</p>
+              <p>
+                <span class="math display">
+                  \begin{cases} x_1&#39;=-0.02x_1\\ x_2&#39;=0.02x_1-0.02x_2
+                  \end{cases} \qquad x_1(0)=50,\ x_2(0)=0
+                </span>
+              </p>
+              <p>
+                Solved in the Laplace practice (exercise 16) and in Python (5.3)
+              </p>
+            </div>
+          </div>
+          <h2 id="biology">1.3. Biology</h2>
+          <table>
+            <colgroup>
+              <col style="width: 33%" />
+              <col style="width: 33%" />
+              <col style="width: 33%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Equation</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Exponential growth</td>
+                <td><span class="math inline">P&#39;=kP</span></td>
+                <td>
+                  Growth proportional to the population,
+                  <span class="math inline">P=P_0e^{kt}</span>
+                </td>
+              </tr>
+              <tr>
+                <td>Logistic</td>
+                <td>
+                  <span class="math inline"
+                    >P&#39;=kP\left(1-\dfrac{P}{K}\right)</span
+                  >
+                </td>
+                <td>
+                  Growth that stops at the carrying capacity
+                  <span class="math inline">K</span>
+                </td>
+              </tr>
+              <tr>
+                <td>Harvesting</td>
+                <td>
+                  <span class="math inline"
+                    >P&#39;=kP\left(1-\dfrac{P}{K}\right)-h</span
+                  >
+                </td>
+                <td>
+                  Logistic minus a constant catch
+                  <span class="math inline">h</span>
+                </td>
+              </tr>
+              <tr>
+                <td>Predator-prey</td>
+                <td>
+                  <span class="math inline"
+                    >\begin{cases}x&#39;=ax-bxy\\y&#39;=-cy+dxy\end{cases}</span
+                  >
+                </td>
+                <td>
+                  <span class="math inline">x</span> prey,
+                  <span class="math inline">y</span> predators,
+                  <span class="math inline">xy</span> counts encounters
+                </td>
+              </tr>
+              <tr>
+                <td>Drug, two compartments</td>
+                <td>
+                  <span class="math inline"
+                    >\begin{cases}g&#39;=-k_1g\\b&#39;=k_1g-k_2b\end{cases}</span
+                  >
+                </td>
+                <td>
+                  <span class="math inline">g</span> in the gut,
+                  <span class="math inline">b</span> in the blood
+                </td>
+              </tr>
+              <tr>
+                <td>SIR epidemic</td>
+                <td>
+                  <span class="math inline"
+                    >\begin{cases}S&#39;=-\beta SI\\I&#39;=\beta SI-\gamma
+                    I\\R&#39;=\gamma I\end{cases}</span
+                  >
+                </td>
+                <td>Susceptible, infected, recovered</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>Logistic solution, worth memorizing:</p>
+          <p>
+            <span class="math display">
+              P(t)=\frac{K}{1+\left(\dfrac{K-P_0}{P_0}\right)e^{-kt}}
+            </span>
+          </p>
+          <div class="flow">
+            <p><strong>Worked example: logistic</strong></p>
+            <p>
+              A lake supports at most 1000 fish. There are 100 today and with no
+              limit they would grow 10% per day
+            </p>
+            <p>Growth rate and capacity:</p>
+            <p>
+              <span class="math display">
+                \displaystyle k=0.1,\qquad K=1000
+              </span>
+            </p>
+            <div class="sol">
+              <p>IVP</p>
+              <p>
+                <span class="math display">
+                  P&#39;=0.1P\left(1-\frac{P}{1000}\right),\qquad P(0)=100
+                </span>
+              </p>
+            </div>
+          </div>
+          <h2 id="chemistry">1.4. Chemistry</h2>
+          <table>
+            <colgroup>
+              <col style="width: 50%" />
+              <col style="width: 50%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Process</th>
+                <th>Equation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>First-order reaction, radioactive decay</td>
+                <td>
+                  <span class="math inline">[A]&#39;=-k[A]</span>, with
+                  <span class="math inline">k=\dfrac{\ln2}{T_{1/2}}</span>
+                </td>
+              </tr>
+              <tr>
+                <td>Second-order <span class="math inline">A+B\to C</span></td>
+                <td>
+                  <span class="math inline">x&#39;=k(a-x)(b-x)</span>,
+                  <span class="math inline">x</span> = product formed,
+                  <span class="math inline">a,b</span> initial amounts
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Consecutive <span class="math inline">A\to B\to C</span>
+                </td>
+                <td>
+                  <span class="math inline"
+                    >\begin{cases}A&#39;=-k_1A\\B&#39;=k_1A-k_2B\\C&#39;=k_2B\end{cases}</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>Newton cooling</td>
+                <td><span class="math inline">T&#39;=-k(T-T_m)</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="flow">
+            <p><strong>Worked example: consecutive reactions</strong></p>
+            <p>
+              <span class="math inline">A</span> turns into
+              <span class="math inline">B</span> with
+              <span class="math inline">k_1=0.3</span> per hour, and
+              <span class="math inline">B</span> into
+              <span class="math inline">C</span> with
+              <span class="math inline">k_2=0.1</span> per hour. Initially there
+              is 2 mol/L of <span class="math inline">A</span> and nothing else
+            </p>
+            <p>Each substance gains what the previous one loses:</p>
+            <p>
+              <span class="math display">
+                \displaystyle A&#39;=-0.3A,\quad B&#39;=0.3A-0.1B,\quad
+                C&#39;=0.1B
+              </span>
+            </p>
+            <div class="sol">
+              <p>IVP</p>
+              <p>
+                <span class="math display">
+                  A(0)=2,\quad B(0)=0,\quad C(0)=0
+                </span>
+              </p>
+              <p>
+                <span class="math inline">A+B+C=2</span> at all times, a quick
+                check of the setup
+              </p>
+            </div>
+          </div>
+          <h2 id="practice">1.5. Practice</h2>
+          <p>
+            Only the setup is asked: the equation and its initial condition. The
+            help shrinks level by level.
+          </p>
+          <p><strong>Level 1: guided, one equation</strong></p>
+          <ol type="1">
+            <li>
+              A 200 L tank holds 20 kg of salt. Brine with 0.25 kg/L enters at 5
+              L/min and the mixture leaves at 5 L/min.
+              <ul>
+                <li>
+                  Rate in: concentration times flow,
+                  <span class="math inline">0.25\cdot5</span>.
+                </li>
+                <li>
+                  Rate out: the tank’s concentration
+                  <span class="math inline">x/200</span> times the flow.
+                </li>
+              </ul>
+            </li>
+            <li>
+              A radioactive sample of 50 g has a half-life of 10 years.
+              <ul>
+                <li>
+                  First-order decay
+                  <span class="math inline">m&#39;=-km</span> with
+                  <span class="math inline">k=\dfrac{\ln2}{T_{1/2}}</span>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              A colony of 500 bacteria grows proportionally to its size and
+              doubles every 3 hours.
+              <ul>
+                <li>
+                  Exponential growth <span class="math inline">P&#39;=kP</span>,
+                  and doubling time works like half-life:
+                  <span class="math inline">k=\dfrac{\ln2}{3}</span>.
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 1</summary>
+            <ol type="1">
+              <li>
+                <span class="math inline"
+                  >x&#39;=1.25-\dfrac{x}{40},\quad x(0)=20</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >m&#39;=-\dfrac{\ln2}{10}m,\quad m(0)=50</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >P&#39;=\dfrac{\ln2}{3}P,\quad P(0)=500</span
+                >
+              </li>
+            </ol>
+          </details>
+          <p><strong>Level 2: one hint each</strong></p>
+          <ol start="4" type="1">
+            <li>
+              A 100 L tank of pure water receives brine with 0.1 kg/L at 3
+              L/min, and the mixture leaves at 2 L/min.
+              <ul>
+                <li>
+                  The volume is not constant:
+                  <span class="math inline">V(t)=100+t</span>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              A lake supports 2000 fish, today there are 200, without limits
+              they would grow 20% per month, and 50 fish are caught per month.
+              <ul>
+                <li>Logistic minus a constant catch.</li>
+              </ul>
+            </li>
+            <li>
+              A coffee at 90 °C is left in a room at 20 °C, with cooling
+              constant <span class="math inline">0.1</span> per minute.
+              <ul>
+                <li>Newton cooling.</li>
+              </ul>
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 2</summary>
+            <ol start="4" type="1">
+              <li>
+                <span class="math inline"
+                  >x&#39;=0.3-\dfrac{2x}{100+t},\quad x(0)=0</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >P&#39;=0.2P\left(1-\dfrac{P}{2000}\right)-50,\quad
+                  P(0)=200</span
+                >
+              </li>
+              <li>
+                <span class="math inline">T&#39;=-0.1(T-20),\quad T(0)=90</span>
+              </li>
+            </ol>
+          </details>
+          <p><strong>Level 3: one word, systems</strong></p>
+          <ol start="7" type="1">
+            <li>
+              Tanks A and B of 50 L each, pure water enters A at 5 L/min, A
+              pours into B at 5 L/min, B drains at 5 L/min, A starts with 10 kg
+              and B with none (series)
+            </li>
+            <li>
+              A 100 mg dose goes to the gut, passes to the blood at rate
+              <span class="math inline">0.5</span> per hour and is eliminated
+              from the blood at <span class="math inline">0.2</span> per hour
+              (compartments)
+            </li>
+            <li>
+              Reaction <span class="math inline">A\to B\to C</span> with
+              <span class="math inline">k_1=2</span>,
+              <span class="math inline">k_2=1</span> and
+              <span class="math inline">[A](0)=1</span> mol/L (chain)
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 3</summary>
+            <ol start="7" type="1">
+              <li>
+                <span class="math inline"
+                  >x_1&#39;=-0.1x_1,\quad x_2&#39;=0.1x_1-0.1x_2,\quad
+                  x_1(0)=10,\ x_2(0)=0</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >g&#39;=-0.5g,\quad b&#39;=0.5g-0.2b,\quad g(0)=100,\
+                  b(0)=0</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >A&#39;=-2A,\quad B&#39;=2A-B,\quad C&#39;=B,\quad A(0)=1,\
+                  B(0)=C(0)=0</span
+                >
+              </li>
+            </ol>
+          </details>
+          <p><strong>Level 4: no help</strong></p>
+          <ol start="10" type="1">
+            <li>
+              Tanks A and B of 100 L each. Pure water enters A at 4 L/min, A
+              pumps into B at 6 L/min, B pumps back into A at 2 L/min and B
+              drains at 4 L/min. A starts with 20 kg, B with none
+            </li>
+            <li>
+              A town of 1000 people has 1 infected, with contact rate
+              <span class="math inline">\beta=0.0005</span> and recovery rate
+              <span class="math inline">\gamma=0.1</span> per day
+            </li>
+            <li>
+              Alone, rabbits grow 8% per month and foxes die 5% per month.
+              Encounters remove <span class="math inline">0.001xy</span> rabbits
+              and add <span class="math inline">0.0002xy</span> foxes. There are
+              1000 rabbits and 50 foxes
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 4</summary>
+            <ol start="10" type="1">
+              <li>
+                <p>
+                  <span class="math inline"
+                    >x_1&#39;=-0.06x_1+0.02x_2,\quad
+                    x_2&#39;=0.06x_1-0.06x_2,\quad x_1(0)=20,\ x_2(0)=0</span
+                  >
+                </p>
+                <p>
+                  Check the volumes: A receives
+                  <span class="math inline">4+2</span> and loses
+                  <span class="math inline">6</span>, B receives
+                  <span class="math inline">6</span> and loses
+                  <span class="math inline">2+4</span>.
+                </p>
+              </li>
+              <li>
+                <p>
+                  <span class="math inline"
+                    >S&#39;=-0.0005SI,\quad I&#39;=0.0005SI-0.1I,\quad
+                    R&#39;=0.1I,\quad S(0)=999,\ I(0)=1,\ R(0)=0</span
+                  >
+                </p>
+              </li>
+              <li>
+                <p>
+                  <span class="math inline"
+                    >x&#39;=0.08x-0.001xy,\quad y&#39;=-0.05y+0.0002xy,\quad
+                    x(0)=1000,\ y(0)=50</span
+                  >
+                </p>
+              </li>
+            </ol>
+          </details>
+        </details>
+        <hr />
+        <details>
+          <summary>
+            <h1 id="laplace-transform">2. LAPLACE TRANSFORM</h1>
+          </summary>
+          <h2 id="definition">2.1. Definition</h2>
+          <p>
+            <span class="math display">
+              \boxed{ \mathcal L\{f(t)\} = \int_0^\infty e^{-st}f(t)dt }
+            </span>
+          </p>
+          <p>
+            The transform turns a function of time into a function of the
+            variable <span class="math inline">s</span>.
+          </p>
+          <h2 id="table-of-common-transforms">
+            2.2. Table of common transforms
+          </h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Function</th>
+                <th>Transform</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="math inline">1</span></td>
+                <td><span class="math inline">\dfrac{1}{s}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">t</span></td>
+                <td><span class="math inline">\dfrac{1}{s^2}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">t^n</span></td>
+                <td><span class="math inline">\dfrac{n!}{s^{n+1}}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">e^{at}</span></td>
+                <td><span class="math inline">\dfrac{1}{s-a}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\sin(at)</span></td>
+                <td><span class="math inline">\dfrac{a}{s^2+a^2}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\cos(at)</span></td>
+                <td><span class="math inline">\dfrac{s}{s^2+a^2}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\sinh(at)</span></td>
+                <td><span class="math inline">\dfrac{a}{s^2-a^2}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\cosh(at)</span></td>
+                <td><span class="math inline">\dfrac{s}{s^2-a^2}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">t^ne^{at}</span></td>
+                <td>
+                  <span class="math inline">\dfrac{n!}{(s-a)^{n+1}}</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">e^{at}\sin(bt)</span></td>
+                <td><span class="math inline">\dfrac{b}{(s-a)^2+b^2}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">e^{at}\cos(bt)</span></td>
+                <td>
+                  <span class="math inline">\dfrac{s-a}{(s-a)^2+b^2}</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">t\sin(at)</span></td>
+                <td>
+                  <span class="math inline">\dfrac{2as}{(s^2+a^2)^2}</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">t\cos(at)</span></td>
+                <td>
+                  <span class="math inline">\dfrac{s^2-a^2}{(s^2+a^2)^2}</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">u(t-a)</span></td>
+                <td><span class="math inline">\dfrac{e^{-as}}{s}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\delta(t)</span></td>
+                <td><span class="math inline">1</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\delta(t-a)</span></td>
+                <td><span class="math inline">e^{-as}</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            Here <span class="math inline">u(t-a)</span> is the unit step
+            function and <span class="math inline">\delta</span> is the Dirac
+            delta, with <span class="math inline">a\geq0</span>.
+          </p>
+          <h2 id="important-properties">2.3. Important properties</h2>
+          <p>Linearity:</p>
+          <p>
+            <span class="math display">
+              \mathcal L\{af+bg\} =a\mathcal L\{f\}+b\mathcal L\{g\}
+            </span>
+          </p>
+          <p>First derivative:</p>
+          <p>
+            <span class="math display"> \mathcal L\{f&#39;\}=sF(s)-f(0) </span>
+          </p>
+          <p>Second derivative:</p>
+          <p>
+            <span class="math display">
+              \mathcal L\{f&#39;&#39;\} =s^2F(s)-sf(0)-f&#39;(0)
+            </span>
+          </p>
+          <p>Derivative of order <span class="math inline">n</span>:</p>
+          <p>
+            <span class="math display">
+              \mathcal L\{f^{(n)}\} = s^nF(s)-s^{n-1}f(0)-\cdots-f^{(n-1)}(0)
+            </span>
+          </p>
+          <p>Exponential shift:</p>
+          <p>
+            <span class="math display"> \mathcal L\{e^{at}f(t)\}=F(s-a) </span>
+          </p>
+          <p>Multiplication by <span class="math inline">t</span>:</p>
+          <p>
+            <span class="math display"> \mathcal L\{tf(t)\}=-F&#39;(s) </span>
+          </p>
+          <p>Multiplication by <span class="math inline">t^n</span>:</p>
+          <p>
+            <span class="math display">
+              \mathcal L\{t^nf(t)\}=(-1)^nF^{(n)}(s)
+            </span>
+          </p>
+          <p>Division by <span class="math inline">t</span>:</p>
+          <p>
+            <span class="math display">
+              \mathcal L\left\{\frac{f(t)}{t}\right\} =\int_s^\infty
+              F(\sigma)d\sigma
+            </span>
+          </p>
+          <p>Integral:</p>
+          <p>
+            <span class="math display">
+              \mathcal L\left\{\int_0^t f(\tau)d\tau\right\} =\frac{F(s)}{s}
+            </span>
+          </p>
+          <p>Time shift, with <span class="math inline">a\geq0</span>:</p>
+          <p>
+            <span class="math display">
+              \mathcal L\{f(t-a)u(t-a)\}=e^{-as}F(s)
+            </span>
+          </p>
+          <p>
+            <span class="math display">
+              \mathcal L\{g(t)u(t-a)\}=e^{-as}\mathcal L\{g(t+a)\}
+            </span>
+          </p>
+          <p>Scaling, with <span class="math inline">c&gt;0</span>:</p>
+          <p>
+            <span class="math display">
+              \mathcal L\{f(ct)\}=\frac{1}{c}F\left(\frac{s}{c}\right)
+            </span>
+          </p>
+          <p>Convolution:</p>
+          <p>
+            <span class="math display">
+              (f*g)(t)=\int_0^t f(\tau)g(t-\tau)d\tau
+            </span>
+          </p>
+          <p><span class="math display"> \mathcal L\{f*g\}=F(s)G(s) </span></p>
+          <p>Periodic function of period <span class="math inline">T</span>:</p>
+          <p>
+            <span class="math display">
+              \mathcal L\{f(t)\} =\frac{1}{1-e^{-sT}}\int_0^T e^{-st}f(t)dt
+            </span>
+          </p>
+          <h2 id="solving-differential-equations-with-laplace">
+            2.4. Solving differential equations with Laplace
+          </h2>
+          <div class="flow">
+            <p><strong>Original equation</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle y&#39;&#39;+ay&#39;+by=g(t)
+              </span>
+            </p>
+            <p>Apply Laplace to both sides:</p>
+            <p>
+              <span class="math display">
+                \displaystyle \mathcal L\{y&#39;&#39;\} +a\mathcal L\{y&#39;\}
+                +b\mathcal L\{y\} =\mathcal L\{g(t)\}
+              </span>
+            </p>
+            <p>Replace the transforms of the derivatives:</p>
+            <p>
+              <span class="math display">
+                \displaystyle (s^2Y-sy(0)-y&#39;(0)) +a(sY-y(0))+bY=G(s)
+              </span>
+            </p>
+            <p>
+              Group the terms that contain
+              <span class="math inline">Y(s)</span>.
+            </p>
+            <p><strong>Solve for the transform</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle Y(s)= \frac{ G(s)+sy(0)+y&#39;(0)+ay(0) }{
+                s^2+as+b }
+              </span>
+            </p>
+            <p>
+              <strong>Decompose into partial fractions</strong>, when
+              applicable.
+            </p>
+            <p>Apply the inverse transform.</p>
+            <div class="sol">
+              <p>General solution</p>
+              <p>
+                <span class="math display"> y(t)=\mathcal L^{-1}\{Y(s)\} </span>
+              </p>
+            </div>
+          </div>
+          <p>
+            The advantage is that the initial conditions appear directly in the
+            algebraic equation.
+          </p>
+          <h2 id="table-of-inverse-transforms">
+            2.5. Table of inverse transforms
+          </h2>
+          <table>
+            <thead>
+              <tr>
+                <th><span class="math inline">F(s)</span></th>
+                <th><span class="math inline">f(t)</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="math inline">\dfrac{1}{s}</span></td>
+                <td><span class="math inline">1</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\dfrac{1}{s^n}</span></td>
+                <td>
+                  <span class="math inline">\dfrac{t^{n-1}}{(n-1)!}</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\dfrac{1}{s-a}</span></td>
+                <td><span class="math inline">e^{at}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\dfrac{1}{(s-a)^n}</span></td>
+                <td>
+                  <span class="math inline">\dfrac{t^{n-1}e^{at}}{(n-1)!}</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\dfrac{1}{(s-a)(s-b)}</span></td>
+                <td>
+                  <span class="math inline">\dfrac{e^{at}-e^{bt}}{a-b}</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\dfrac{1}{s^2+a^2}</span></td>
+                <td><span class="math inline">\dfrac{\sin(at)}{a}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\dfrac{s}{s^2+a^2}</span></td>
+                <td><span class="math inline">\cos(at)</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\dfrac{1}{s^2-a^2}</span></td>
+                <td><span class="math inline">\dfrac{\sinh(at)}{a}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\dfrac{s}{s^2-a^2}</span></td>
+                <td><span class="math inline">\cosh(at)</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\dfrac{1}{(s-a)^2+b^2}</span></td>
+                <td>
+                  <span class="math inline">\dfrac{e^{at}\sin(bt)}{b}</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="math inline">\dfrac{s-a}{(s-a)^2+b^2}</span>
+                </td>
+                <td><span class="math inline">e^{at}\cos(bt)</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\dfrac{1}{(s^2+a^2)^2}</span></td>
+                <td>
+                  <span class="math inline"
+                    >\dfrac{\sin(at)-at\cos(at)}{2a^3}</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\dfrac{s}{(s^2+a^2)^2}</span></td>
+                <td><span class="math inline">\dfrac{t\sin(at)}{2a}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">e^{-as}F(s)</span></td>
+                <td><span class="math inline">f(t-a)u(t-a)</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">F(s)G(s)</span></td>
+                <td><span class="math inline">(f*g)(t)</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            For an irreducible quadratic denominator, complete the square to
+            reach the forms with <span class="math inline">(s-a)^2+b^2</span>:
+          </p>
+          <p>
+            <span class="math display">
+              s^2+ps+q=\left(s+\frac{p}{2}\right)^2+q-\frac{p^2}{4}
+            </span>
+          </p>
+          <h2 id="partial-fraction-expansions">
+            2.6. Partial fraction expansions
+          </h2>
+          <p>
+            The table of inverses only has simple fractions, so a fraction with
+            a factored denominator has to be split into a sum of simple ones
+            first. Splitting is the reverse of adding fractions: find which
+            simple fractions add up to the original.
+          </p>
+          <p><strong>Which numerator each factor gets</strong></p>
+          <p>
+            The denominator decides the shape, never the numerator. Each factor
+            of the denominator gets a numerator one degree lower than itself:
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Factor in the denominator</th>
+                <th>Term in the expansion</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="math inline">s-a</span></td>
+                <td><span class="math inline">\dfrac{A}{s-a}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">(s-a)^2</span></td>
+                <td>
+                  <span class="math inline"
+                    >\dfrac{A}{s-a}+\dfrac{B}{(s-a)^2}</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="math inline">s^2+bs+c</span> with no real roots
+                </td>
+                <td><span class="math inline">\dfrac{As+B}{s^2+bs+c}</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            A quadratic has no real roots when
+            <span class="math inline">b^2-4c&lt;0</span>. Otherwise factor it
+            into linear factors and give each one a constant.
+          </p>
+          <p>
+            The degree of the numerator of
+            <span class="math inline">F(s)</span> must be lower than the degree
+            of its denominator. If it is not, do polynomial division first.
+          </p>
+          <p><strong>Distinct linear factors</strong></p>
+          <div class="flow">
+            <p><strong>Worked example</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle F(s)=\frac{s}{(s+3)(s-1)}
+              </span>
+            </p>
+            <p>
+              Both factors are linear, so each one gets a constant on top, even
+              though the numerator has an <span class="math inline">s</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle \frac{s}{(s+3)(s-1)}=\frac{A}{s+3}+\frac{B}{s-1}
+              </span>
+            </p>
+            <p>
+              Multiply both sides by
+              <span class="math inline">(s+3)(s-1)</span> to clear the
+              denominators:
+            </p>
+            <p>
+              <span class="math display"> \displaystyle s=A(s-1)+B(s+3) </span>
+            </p>
+            <p>
+              This equality holds for every <span class="math inline">s</span>,
+              so pick the values that turn one parenthesis into zero.
+            </p>
+            <p>
+              Substitute <span class="math inline">s=1</span>, the root that
+              cancels the term with <span class="math inline">A</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle 1=4B,\qquad B=\frac{1}{4}
+              </span>
+            </p>
+            <p>
+              Substitute <span class="math inline">s=-3</span>, the root that
+              cancels the term with <span class="math inline">B</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle -3=-4A,\qquad A=\frac{3}{4}
+              </span>
+            </p>
+            <p><strong>Expansion</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle
+                \frac{s}{(s+3)(s-1)}=\frac{3/4}{s+3}+\frac{1/4}{s-1}
+              </span>
+            </p>
+            <p>
+              Invert each term with
+              <span class="math inline">\dfrac{1}{s-a}\to e^{at}</span>.
+            </p>
+            <div class="sol">
+              <p>Inverse transform</p>
+              <p>
+                <span class="math display">
+                  f(t)=\frac{3}{4}e^{-3t}+\frac{1}{4}e^{t}
+                </span>
+              </p>
+            </div>
+          </div>
+          <p><strong>Repeated linear factor</strong></p>
+          <p>
+            A factor <span class="math inline">(s-a)^2</span> needs one term for
+            each power, because adding
+            <span class="math inline">\dfrac{A}{s-a}</span> and
+            <span class="math inline">\dfrac{B}{(s-a)^2}</span> gives back that
+            same denominator.
+          </p>
+          <div class="flow">
+            <p><strong>Worked example</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle F(s)=\frac{s+1}{(s-2)^2}
+              </span>
+            </p>
+            <p>One term for each power of the repeated factor:</p>
+            <p>
+              <span class="math display">
+                \displaystyle
+                \frac{s+1}{(s-2)^2}=\frac{A}{s-2}+\frac{B}{(s-2)^2}
+              </span>
+            </p>
+            <p>
+              Multiply both sides by <span class="math inline">(s-2)^2</span>:
+            </p>
+            <p>
+              <span class="math display"> \displaystyle s+1=A(s-2)+B </span>
+            </p>
+            <p>
+              Substitute <span class="math inline">s=2</span>, the only root:
+            </p>
+            <p><span class="math display"> \displaystyle 3=B </span></p>
+            <p>
+              There are no more roots to substitute, so compare the coefficients
+              of <span class="math inline">s</span> on both sides:
+            </p>
+            <p><span class="math display"> \displaystyle 1=A </span></p>
+            <p><strong>Expansion</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle
+                \frac{s+1}{(s-2)^2}=\frac{1}{s-2}+\frac{3}{(s-2)^2}
+              </span>
+            </p>
+            <p>
+              Invert with
+              <span class="math inline">\dfrac{1}{s-a}\to e^{at}</span> and
+              <span class="math inline">\dfrac{1}{(s-a)^2}\to te^{at}</span>.
+            </p>
+            <div class="sol">
+              <p>Inverse transform</p>
+              <p><span class="math display"> f(t)=e^{2t}+3te^{2t} </span></p>
+            </div>
+          </div>
+          <p><strong>Quadratic factor with no real roots</strong></p>
+          <div class="flow">
+            <p><strong>Worked example</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle F(s)=\frac{1}{(s-1)(s^2+4)}
+              </span>
+            </p>
+            <p>
+              <span class="math inline">s^2+4</span> has no real roots, so it
+              gets <span class="math inline">Bs+C</span> on top, even though the
+              numerator is just <span class="math inline">1</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle
+                \frac{1}{(s-1)(s^2+4)}=\frac{A}{s-1}+\frac{Bs+C}{s^2+4}
+              </span>
+            </p>
+            <p>
+              Multiply both sides by
+              <span class="math inline">(s-1)(s^2+4)</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle 1=A(s^2+4)+(Bs+C)(s-1)
+              </span>
+            </p>
+            <p>
+              Substitute <span class="math inline">s=1</span>, the only real
+              root:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle 1=5A,\qquad A=\frac{1}{5}
+              </span>
+            </p>
+            <p>
+              Expand the right side and compare the coefficients of
+              <span class="math inline">s^2</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle 0=A+B,\qquad B=-\frac{1}{5}
+              </span>
+            </p>
+            <p>Compare the constant terms:</p>
+            <p>
+              <span class="math display">
+                \displaystyle 1=4A-C,\qquad C=-\frac{1}{5}
+              </span>
+            </p>
+            <p><strong>Expansion</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle \frac{1}{(s-1)(s^2+4)}
+                =\frac{1/5}{s-1}-\frac{1}{5}\cdot\frac{s+1}{s^2+4}
+              </span>
+            </p>
+            <p>
+              Split the quadratic term so each piece matches the table,
+              <span class="math inline">\dfrac{s}{s^2+a^2}\to\cos(at)</span> and
+              <span class="math inline">\dfrac{a}{s^2+a^2}\to\sin(at)</span>
+              with <span class="math inline">a=2</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle \frac{s+1}{s^2+4}
+                =\frac{s}{s^2+4}+\frac{1}{2}\cdot\frac{2}{s^2+4}
+              </span>
+            </p>
+            <div class="sol">
+              <p>Inverse transform</p>
+              <p>
+                <span class="math display">
+                  f(t)=\frac{1}{5}e^{t}-\frac{1}{5}\cos(2t)-\frac{1}{10}\sin(2t)
+                </span>
+              </p>
+            </div>
+          </div>
+          <h2 id="practice-1">2.7. Practice</h2>
+          <p>
+            The help shrinks level by level. Try each exercise before opening
+            the answers.
+          </p>
+          <p><strong>Level 1: guided, tables only</strong></p>
+          <ol type="1">
+            <li>
+              <span class="math inline">\mathcal L\{3-2e^{4t}+\sin(2t)\}</span>
+              <ul>
+                <li>
+                  Linearity: transform each term separately with the table.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline">\mathcal L\{t^2e^{-t}\}</span>
+              <ul>
+                <li>
+                  Row <span class="math inline">t^ne^{at}</span> with
+                  <span class="math inline">n=2</span>,
+                  <span class="math inline">a=-1</span>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline"
+                >\mathcal L^{-1}\left\{\dfrac{2s+3}{s^2+9}\right\}</span
+              >
+              <ul>
+                <li>
+                  Split into
+                  <span class="math inline"
+                    >2\cdot\dfrac{s}{s^2+9}+\dfrac{3}{s^2+9}</span
+                  >, cosine and sine with <span class="math inline">a=3</span>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline"
+                >\mathcal L^{-1}\left\{\dfrac{1}{s^2+4s+13}\right\}</span
+              >
+              <ul>
+                <li>
+                  No real roots: complete the square,
+                  <span class="math inline">s^2+4s+13=(s+2)^2+9</span>.
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 1</summary>
+            <ol type="1">
+              <li>
+                <span class="math inline"
+                  >\dfrac{3}{s}-\dfrac{2}{s-4}+\dfrac{2}{s^2+4}</span
+                >
+              </li>
+              <li><span class="math inline">\dfrac{2}{(s+1)^3}</span></li>
+              <li><span class="math inline">2\cos(3t)+\sin(3t)</span></li>
+              <li>
+                <span class="math inline">\dfrac{1}{3}e^{-2t}\sin(3t)</span>
+              </li>
+            </ol>
+          </details>
+          <p><strong>Level 2: one hint each, first-order IVPs</strong></p>
+          <ol start="5" type="1">
+            <li>
+              <span class="math inline">y&#39;-2y=0,\quad y(0)=3</span>
+              <ul>
+                <li>
+                  <span class="math inline">Y</span> comes out as a single
+                  fraction of the table.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline">y&#39;+3y=e^{-t},\quad y(0)=0</span>
+              <ul>
+                <li>
+                  Partial fractions with the roots
+                  <span class="math inline">s=-1</span> and
+                  <span class="math inline">s=-3</span>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline">y&#39;+y=2,\quad y(0)=1</span>
+              <ul>
+                <li>
+                  The constant <span class="math inline">2</span> transforms to
+                  <span class="math inline">\dfrac{2}{s}</span>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline">x&#39;=2-0.04x,\quad x(0)=10</span>, the
+              tank of 1.2
+              <ul>
+                <li>
+                  Same as exercise 7, with roots
+                  <span class="math inline">s=0</span> and
+                  <span class="math inline">s=-0.04</span>.
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 2</summary>
+            <ol start="5" type="1">
+              <li><span class="math inline">y=3e^{2t}</span></li>
+              <li>
+                <span class="math inline"
+                  >y=\dfrac{1}{2}\left(e^{-t}-e^{-3t}\right)</span
+                >
+              </li>
+              <li><span class="math inline">y=2-e^{-t}</span></li>
+              <li><span class="math inline">x=50-40e^{-0.04t}</span></li>
+            </ol>
+          </details>
+          <p><strong>Level 3: one word, second order</strong></p>
+          <ol start="9" type="1">
+            <li>
+              <span class="math inline"
+                >y&#39;&#39;+4y=0,\quad y(0)=1,\ y&#39;(0)=2</span
+              >
+              (table)
+            </li>
+            <li>
+              <span class="math inline"
+                >y&#39;&#39;-y&#39;-2y=0,\quad y(0)=1,\ y&#39;(0)=0</span
+              >
+              (distinct roots)
+            </li>
+            <li>
+              <span class="math inline"
+                >y&#39;&#39;+2y&#39;+y=0,\quad y(0)=1,\ y&#39;(0)=0</span
+              >
+              (repeated root)
+            </li>
+            <li>
+              <span class="math inline"
+                >y&#39;&#39;+2y&#39;+5y=0,\quad y(0)=1,\ y&#39;(0)=0</span
+              >
+              (complete the square)
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 3</summary>
+            <ol start="9" type="1">
+              <li><span class="math inline">y=\cos(2t)+\sin(2t)</span></li>
+              <li>
+                <span class="math inline"
+                  >y=\dfrac{1}{3}e^{2t}+\dfrac{2}{3}e^{-t}</span
+                >
+              </li>
+              <li><span class="math inline">y=e^{-t}+te^{-t}</span></li>
+              <li>
+                <span class="math inline"
+                  >y=e^{-t}\cos(2t)+\dfrac{1}{2}e^{-t}\sin(2t)</span
+                >
+              </li>
+            </ol>
+          </details>
+          <p><strong>Level 4: no help</strong></p>
+          <ol start="13" type="1">
+            <li>
+              <span class="math inline"
+                >y&#39;&#39;-3y&#39;+2y=e^{3t},\quad y(0)=1,\ y&#39;(0)=0</span
+              >
+            </li>
+            <li>
+              <span class="math inline">y&#39;+y=u(t-2),\quad y(0)=0</span>
+            </li>
+            <li>
+              <span class="math inline"
+                >y&#39;&#39;+4y=\delta(t-1),\quad y(0)=0,\ y&#39;(0)=0</span
+              >
+            </li>
+            <li>
+              <span class="math inline"
+                >x_1&#39;=-0.02x_1,\quad x_2&#39;=0.02x_1-0.02x_2,\quad
+                x_1(0)=50,\ x_2(0)=0</span
+              >, the two tanks of 1.2
+            </li>
+            <li>
+              <span class="math inline"
+                >x&#39;=y,\quad y&#39;=-x,\quad x(0)=1,\ y(0)=0</span
+              >
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 4</summary>
+            <ol start="13" type="1">
+              <li>
+                <span class="math inline"
+                  >y=\dfrac{5}{2}e^{t}-2e^{2t}+\dfrac{1}{2}e^{3t}</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >y=\left(1-e^{-(t-2)}\right)u(t-2)</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >y=\dfrac{1}{2}\sin\big(2(t-1)\big)\,u(t-1)</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >x_1=50e^{-0.02t},\quad x_2=te^{-0.02t}</span
+                >, tank B peaks at <span class="math inline">t=50</span> min
+              </li>
+              <li><span class="math inline">x=\cos t,\quad y=-\sin t</span></li>
+            </ol>
+            <p>
+              For systems, transform every equation, solve the algebraic system
+              for <span class="math inline">X</span> and
+              <span class="math inline">Y</span>, then invert each one.
+            </p>
+          </details>
+        </details>
+        <hr />
+        <details>
+          <summary>
+            <h1 id="fourier-transform">3. FOURIER TRANSFORM</h1>
+          </summary>
+          <h2 id="definition-1">3.1. Definition</h2>
+          <p>
+            <span class="math display">
+              \boxed{ \mathcal F\{f(t)\}=F(\omega) = \int_{-\infty}^{\infty}
+              f(t)e^{-i\omega t}dt }
+            </span>
+          </p>
+          <p>
+            The transform turns a function of time into a function of the
+            frequency <span class="math inline">\omega</span>:
+            <span class="math inline">F(\omega)</span> says how much of the
+            oscillation <span class="math inline">e^{i\omega t}</span> is inside
+            <span class="math inline">f(t)</span>.
+          </p>
+          <p>
+            It is the same idea as Laplace with two changes: the exponent is
+            <span class="math inline">-i\omega t</span> instead of
+            <span class="math inline">-st</span>, and the integral covers all
+            time instead of starting at <span class="math inline">0</span>.
+          </p>
+          <p>Inverse transform:</p>
+          <p>
+            <span class="math display">
+              \boxed{
+              f(t)=\frac{1}{2\pi}\int_{-\infty}^{\infty}F(\omega)e^{i\omega
+              t}d\omega }
+            </span>
+          </p>
+          <p>
+            Euler’s formula is the tool that turns complex exponentials into
+            sines and cosines:
+          </p>
+          <p>
+            <span class="math display">
+              e^{i\theta}=\cos\theta+i\sin\theta
+            </span>
+          </p>
+          <p>
+            <span class="math display">
+              \cos\theta=\frac{e^{i\theta}+e^{-i\theta}}{2}, \qquad
+              \sin\theta=\frac{e^{i\theta}-e^{-i\theta}}{2i}
+            </span>
+          </p>
+          <h2 id="table-of-common-transforms-1">
+            3.2. Table of common transforms
+          </h2>
+          <table>
+            <colgroup>
+              <col style="width: 50%" />
+              <col style="width: 50%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Function</th>
+                <th>Transform</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="math inline">e^{-at}u(t)</span></td>
+                <td><span class="math inline">\dfrac{1}{a+i\omega}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">te^{-at}u(t)</span></td>
+                <td>
+                  <span class="math inline">\dfrac{1}{(a+i\omega)^2}</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">e^{-a\lvert t\rvert}</span></td>
+                <td>
+                  <span class="math inline">\dfrac{2a}{a^2+\omega^2}</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">e^{-at^2}</span></td>
+                <td>
+                  <span class="math inline"
+                    >\sqrt{\dfrac{\pi}{a}}\,e^{-\omega^2/(4a)}</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\dfrac{1}{a^2+t^2}</span></td>
+                <td>
+                  <span class="math inline"
+                    >\dfrac{\pi}{a}e^{-a\lvert\omega\rvert}</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="math inline">1</span> for
+                  <span class="math inline">\lvert t\rvert&lt;a</span>,
+                  <span class="math inline">0</span> otherwise
+                </td>
+                <td>
+                  <span class="math inline"
+                    >\dfrac{2\sin(a\omega)}{\omega}</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\delta(t)</span></td>
+                <td><span class="math inline">1</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\delta(t-a)</span></td>
+                <td><span class="math inline">e^{-ia\omega}</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">1</span></td>
+                <td><span class="math inline">2\pi\delta(\omega)</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">e^{iat}</span></td>
+                <td><span class="math inline">2\pi\delta(\omega-a)</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\cos(at)</span></td>
+                <td>
+                  <span class="math inline"
+                    >\pi[\delta(\omega-a)+\delta(\omega+a)]</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\sin(at)</span></td>
+                <td>
+                  <span class="math inline"
+                    >\dfrac{\pi}{i}[\delta(\omega-a)-\delta(\omega+a)]</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">u(t)</span></td>
+                <td>
+                  <span class="math inline"
+                    >\pi\delta(\omega)+\dfrac{1}{i\omega}</span
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            Here <span class="math inline">u(t)</span> is the unit step function
+            and <span class="math inline">\delta</span> is the Dirac delta. The
+            first six rows need <span class="math inline">a&gt;0</span>.
+          </p>
+          <p>
+            How to read the table: what is short in time is wide in frequency,
+            and the other way around. An instant impulse
+            <span class="math inline">\delta(t)</span> contains every frequency
+            equally, while a pure oscillation
+            <span class="math inline">\cos(at)</span> contains only the
+            frequencies <span class="math inline">\pm a</span>.
+          </p>
+          <h2 id="important-properties-1">3.3. Important properties</h2>
+          <p>
+            <span class="math inline">F(\omega)</span> and
+            <span class="math inline">G(\omega)</span> are the transforms of
+            <span class="math inline">f(t)</span> and
+            <span class="math inline">g(t)</span>.
+          </p>
+          <p>Linearity:</p>
+          <p>
+            <span class="math display">
+              \mathcal F\{af+bg\}=aF(\omega)+bG(\omega)
+            </span>
+          </p>
+          <p>Time shift, a delay only multiplies by a complex exponential:</p>
+          <p>
+            <span class="math display">
+              \mathcal F\{f(t-a)\}=e^{-ia\omega}F(\omega)
+            </span>
+          </p>
+          <p>
+            Frequency shift, multiplying by an oscillation moves the transform:
+          </p>
+          <p>
+            <span class="math display">
+              \mathcal F\{e^{iat}f(t)\}=F(\omega-a)
+            </span>
+          </p>
+          <p>Scaling, compressing in time stretches in frequency:</p>
+          <p>
+            <span class="math display">
+              \mathcal F\{f(at)\}=\frac{1}{\lvert
+              a\rvert}F\left(\frac{\omega}{a}\right)
+            </span>
+          </p>
+          <p>
+            Derivative, each derivative becomes a multiplication by
+            <span class="math inline">i\omega</span>:
+          </p>
+          <p>
+            <span class="math display">
+              \mathcal F\{f&#39;\}=i\omega F(\omega)
+            </span>
+          </p>
+          <p>
+            <span class="math display">
+              \mathcal F\{f^{(n)}\}=(i\omega)^nF(\omega)
+            </span>
+          </p>
+          <p>Unlike Laplace, no initial conditions appear.</p>
+          <p>Multiplication by <span class="math inline">t</span>:</p>
+          <p>
+            <span class="math display">
+              \mathcal F\{tf(t)\}=iF&#39;(\omega)
+            </span>
+          </p>
+          <p>Convolution, it becomes a plain product:</p>
+          <p>
+            <span class="math display">
+              (f*g)(t)=\int_{-\infty}^{\infty}f(\tau)g(t-\tau)d\tau
+            </span>
+          </p>
+          <p>
+            <span class="math display">
+              \mathcal F\{f*g\}=F(\omega)G(\omega)
+            </span>
+          </p>
+          <p>Symmetry, every row of the table can be read backwards:</p>
+          <p>
+            <span class="math display">
+              \mathcal F\{F(t)\}=2\pi f(-\omega)
+            </span>
+          </p>
+          <h2 id="computing-a-transform-from-the-definition">
+            3.4. Computing a transform from the definition
+          </h2>
+          <div class="flow">
+            <p><strong>Worked example: decaying exponential</strong></p>
+            <p>
+              <span class="math display"> \displaystyle f(t)=e^{-2t}u(t) </span>
+            </p>
+            <p>
+              <span class="math inline">u(t)</span> is zero for negative
+              <span class="math inline">t</span>, so the integral starts at
+              <span class="math inline">0</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle F(\omega)=\int_0^\infty e^{-2t}e^{-i\omega t}dt
+              </span>
+            </p>
+            <p>Join the exponentials:</p>
+            <p>
+              <span class="math display">
+                \displaystyle F(\omega)=\int_0^\infty e^{-(2+i\omega)t}dt
+              </span>
+            </p>
+            <p>
+              Integrate like any exponential, treating
+              <span class="math inline">2+i\omega</span> as a constant:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle
+                F(\omega)=\left[-\frac{e^{-(2+i\omega)t}}{2+i\omega}\right]_0^\infty
+              </span>
+            </p>
+            <p>
+              At infinity the exponential vanishes because of the
+              <span class="math inline">e^{-2t}</span>, and at
+              <span class="math inline">0</span> it equals
+              <span class="math inline">1</span>.
+            </p>
+            <div class="sol">
+              <p>Transform</p>
+              <p>
+                <span class="math display">
+                  F(\omega)=\frac{1}{2+i\omega}
+                </span>
+              </p>
+            </div>
+          </div>
+          <div class="flow">
+            <p><strong>Worked example: rectangular pulse</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle f(t)=1\ \text{for}\ \lvert t\rvert&lt;1,\qquad
+                f(t)=0\ \text{otherwise}
+              </span>
+            </p>
+            <p>
+              The function is zero outside the pulse, so integrate only from
+              <span class="math inline">-1</span> to
+              <span class="math inline">1</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle F(\omega)=\int_{-1}^{1}e^{-i\omega t}dt
+              </span>
+            </p>
+            <p>Integrate the exponential:</p>
+            <p>
+              <span class="math display">
+                \displaystyle F(\omega)=\left[\frac{e^{-i\omega
+                t}}{-i\omega}\right]_{-1}^{1}
+                =\frac{e^{i\omega}-e^{-i\omega}}{i\omega}
+              </span>
+            </p>
+            <p>
+              Use Euler:
+              <span class="math inline"
+                >e^{i\omega}-e^{-i\omega}=2i\sin\omega</span
+              >.
+            </p>
+            <div class="sol">
+              <p>Transform</p>
+              <p>
+                <span class="math display">
+                  F(\omega)=\frac{2\sin\omega}{\omega}
+                </span>
+              </p>
+            </div>
+          </div>
+          <h2 id="solving-differential-equations-with-fourier">
+            3.5. Solving differential equations with Fourier
+          </h2>
+          <p>
+            The steps are the same as with Laplace: transform, solve the
+            algebra, go back with the table.
+          </p>
+          <div class="flow">
+            <p><strong>Worked example</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle y&#39;+3y=e^{-2t}u(t)
+              </span>
+            </p>
+            <p>
+              Apply Fourier to both sides, with
+              <span class="math inline">y&#39;\to i\omega Y</span> and the right
+              side from the table:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle i\omega Y+3Y=\frac{1}{2+i\omega}
+              </span>
+            </p>
+            <p><strong>Solve for the transform</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle Y(\omega)=\frac{1}{(2+i\omega)(3+i\omega)}
+              </span>
+            </p>
+            <p>
+              Expand in partial fractions, treating
+              <span class="math inline">i\omega</span> as a single variable like
+              <span class="math inline">s</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle Y(\omega)=\frac{1}{2+i\omega}-\frac{1}{3+i\omega}
+              </span>
+            </p>
+            <p>
+              Invert each term with
+              <span class="math inline"
+                >\dfrac{1}{a+i\omega}\to e^{-at}u(t)</span
+              >.
+            </p>
+            <div class="sol">
+              <p>Solution</p>
+              <p>
+                <span class="math display">
+                  y(t)=\left(e^{-2t}-e^{-3t}\right)u(t)
+                </span>
+              </p>
+            </div>
+          </div>
+          <p>
+            Fourier has no place for initial conditions: it gives the solution
+            that is zero before the input starts. For problems with initial
+            conditions use Laplace.
+          </p>
+          <h2 id="practice-2">3.6. Practice</h2>
+          <p>
+            The help shrinks level by level. Try each exercise before opening
+            the answers.
+          </p>
+          <p><strong>Level 1: guided, from the definition</strong></p>
+          <p>The setup is given, only the integral is left to you.</p>
+          <ol type="1">
+            <li>
+              <span class="math inline">f(t)=e^{-3t}u(t)</span>
+              <ul>
+                <li>
+                  <span class="math inline">u(t)</span> is zero for negative
+                  <span class="math inline">t</span>, so
+                  <span class="math inline"
+                    >F(\omega)=\int_0^\infty e^{-3t}e^{-i\omega t}dt</span
+                  >.
+                </li>
+                <li>
+                  Join the exponentials into
+                  <span class="math inline">e^{-(3+i\omega)t}</span>.
+                </li>
+                <li>
+                  Integrate. At infinity the exponential vanishes, at
+                  <span class="math inline">0</span> it equals
+                  <span class="math inline">1</span>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline">f(t)=e^{2t}u(-t)</span>
+              <ul>
+                <li>
+                  <span class="math inline">u(-t)</span> is zero for positive
+                  <span class="math inline">t</span>, so
+                  <span class="math inline"
+                    >F(\omega)=\int_{-\infty}^0 e^{2t}e^{-i\omega t}dt</span
+                  >.
+                </li>
+                <li>
+                  Join the exponentials into
+                  <span class="math inline">e^{(2-i\omega)t}</span>.
+                </li>
+                <li>
+                  Integrate. At <span class="math inline">-\infty</span> the
+                  exponential vanishes, at <span class="math inline">0</span> it
+                  equals <span class="math inline">1</span>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline">f(t)=1</span> for
+              <span class="math inline">0&lt;t&lt;2</span>,
+              <span class="math inline">0</span> otherwise
+              <ul>
+                <li>
+                  The function is zero outside the pulse, so
+                  <span class="math inline"
+                    >F(\omega)=\int_0^2 e^{-i\omega t}dt</span
+                  >.
+                </li>
+                <li>Integrate and evaluate at both ends.</li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline">f(t)=e^{-\lvert t\rvert}</span>
+              <ul>
+                <li>
+                  Split at <span class="math inline">0</span>, because
+                  <span class="math inline">\lvert t\rvert=-t</span> for
+                  negative <span class="math inline">t</span>:
+                  <span class="math inline"
+                    >F(\omega)=\int_{-\infty}^0 e^{t}e^{-i\omega
+                    t}dt+\int_0^\infty e^{-t}e^{-i\omega t}dt</span
+                  >.
+                </li>
+                <li>Each integral works like exercises 1 and 2.</li>
+                <li>Add the two fractions with a common denominator.</li>
+              </ul>
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 1</summary>
+            <ol type="1">
+              <li><span class="math inline">\dfrac{1}{3+i\omega}</span></li>
+              <li><span class="math inline">\dfrac{1}{2-i\omega}</span></li>
+              <li>
+                <span class="math inline"
+                  >\dfrac{1-e^{-2i\omega}}{i\omega}</span
+                >
+              </li>
+              <li><span class="math inline">\dfrac{2}{1+\omega^2}</span></li>
+            </ol>
+          </details>
+          <p><strong>Level 2: one hint each, table and properties</strong></p>
+          <ol start="5" type="1">
+            <li>
+              <span class="math inline">f(t)=e^{-3(t-2)}u(t-2)</span>
+              <ul>
+                <li>
+                  It is <span class="math inline">e^{-3t}u(t)</span> delayed by
+                  <span class="math inline">2</span>: use the time shift.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline">f(t)=1</span> for
+              <span class="math inline">\lvert t\rvert&lt;3</span>,
+              <span class="math inline">0</span> otherwise
+              <ul>
+                <li>It is a row of the table.</li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline">f(t)=te^{-\lvert t\rvert}</span>
+              <ul>
+                <li>
+                  Use multiplication by <span class="math inline">t</span> on
+                  the answer of exercise 4.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline">f(t)=e^{-2t}\cos(5t)u(t)</span>
+              <ul>
+                <li>
+                  Write the cosine with Euler, then use the frequency shift on
+                  <span class="math inline">e^{-2t}u(t)</span>.
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 2</summary>
+            <ol start="5" type="1">
+              <li>
+                <span class="math inline"
+                  >\dfrac{e^{-2i\omega}}{3+i\omega}</span
+                >
+              </li>
+              <li>
+                <span class="math inline">\dfrac{2\sin(3\omega)}{\omega}</span>
+              </li>
+              <li>
+                <span class="math inline"
+                  >-\dfrac{4i\omega}{(1+\omega^2)^2}</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >\dfrac{2+i\omega}{(2+i\omega)^2+25}</span
+                >
+              </li>
+            </ol>
+          </details>
+          <p><strong>Level 3: one word, inverse transforms</strong></p>
+          <p>Find <span class="math inline">f(t)</span>.</p>
+          <ol start="9" type="1">
+            <li>
+              <span class="math inline">F(\omega)=\dfrac{1}{4+i\omega}</span>
+              (table)
+            </li>
+            <li>
+              <span class="math inline">F(\omega)=\dfrac{6}{9+\omega^2}</span>
+              (table)
+            </li>
+            <li>
+              <span class="math inline"
+                >F(\omega)=\dfrac{e^{-3i\omega}}{1+i\omega}</span
+              >
+              (time shift)
+            </li>
+            <li>
+              <span class="math inline"
+                >F(\omega)=\dfrac{1}{(1+i\omega)(4+i\omega)}</span
+              >
+              (partial fractions)
+            </li>
+            <li>
+              <span class="math inline"
+                >F(\omega)=\dfrac{i\omega}{(2+i\omega)(3+i\omega)}</span
+              >
+              (partial fractions)
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 3</summary>
+            <ol start="9" type="1">
+              <li><span class="math inline">e^{-4t}u(t)</span></li>
+              <li><span class="math inline">e^{-3\lvert t\rvert}</span></li>
+              <li><span class="math inline">e^{-(t-3)}u(t-3)</span></li>
+              <li>
+                <span class="math inline"
+                  >\dfrac{1}{3}\left(e^{-t}-e^{-4t}\right)u(t)</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >\left(3e^{-3t}-2e^{-2t}\right)u(t)</span
+                >
+              </li>
+            </ol>
+          </details>
+          <p><strong>Level 4: no help</strong></p>
+          <ol start="14" type="1">
+            <li>Solve <span class="math inline">y&#39;+2y=\delta(t)</span></li>
+            <li>
+              Solve <span class="math inline">y&#39;+5y=e^{-2t}u(t)</span>
+            </li>
+            <li>
+              Solve
+              <span class="math inline">y&#39;&#39;+3y&#39;+2y=\delta(t)</span>
+            </li>
+            <li>
+              Compute the convolution of
+              <span class="math inline">e^{-t}u(t)</span> and
+              <span class="math inline">e^{-2t}u(t)</span> with the transform
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 4</summary>
+            <ol start="14" type="1">
+              <li><span class="math inline">y(t)=e^{-2t}u(t)</span></li>
+              <li>
+                <span class="math inline"
+                  >y(t)=\dfrac{1}{3}\left(e^{-2t}-e^{-5t}\right)u(t)</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >y(t)=\left(e^{-t}-e^{-2t}\right)u(t)</span
+                >
+              </li>
+              <li>
+                <span class="math inline">\left(e^{-t}-e^{-2t}\right)u(t)</span>
+              </li>
+            </ol>
+            <p>
+              Exercises 16 and 17 give the same result: the solution of an
+              equation with input <span class="math inline">\delta(t)</span> is
+              that convolution, and both lead to
+              <span class="math inline">\dfrac{1}{(1+i\omega)(2+i\omega)}</span
+              >.
+            </p>
+          </details>
+        </details>
+        <hr />
+        <details>
+          <summary>
+            <h1 id="fourier-for-pdes">4. FOURIER FOR PDEs</h1>
+          </summary>
+          <h2 id="which-tool-for-which-domain">
+            4.1. Which tool for which domain
+          </h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Domain of <span class="math inline">x</span></th>
+                <th>Condition at <span class="math inline">x=0</span></th>
+                <th>Tool</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="math inline">-\infty&lt;x&lt;\infty</span></td>
+                <td>none</td>
+                <td>Fourier transform</td>
+              </tr>
+              <tr>
+                <td><span class="math inline">0&lt;x&lt;\infty</span></td>
+                <td>
+                  <span class="math inline">u(0,t)</span> given (Dirichlet)
+                </td>
+                <td>Fourier sine transform</td>
+              </tr>
+              <tr>
+                <td><span class="math inline">0&lt;x&lt;\infty</span></td>
+                <td>
+                  <span class="math inline">u_x(0,t)</span> given (Neumann)
+                </td>
+                <td>Fourier cosine transform</td>
+              </tr>
+              <tr>
+                <td><span class="math inline">0&lt;x&lt;L</span></td>
+                <td>both ends given</td>
+                <td>Fourier series, separation of variables</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            The idea is always the same: transform in
+            <span class="math inline">x</span>, the PDE becomes an ODE in
+            <span class="math inline">t</span> for each
+            <span class="math inline">\omega</span>, solve it, then invert.
+          </p>
+          <h2 id="transforms-and-their-key-rules">
+            4.2. Transforms and their key rules
+          </h2>
+          <p>Full transform:</p>
+          <p>
+            <span class="math display">
+              \mathcal F\{f\}=F(\omega)=\int_{-\infty}^{\infty}f(x)e^{-i\omega
+              x}dx, \qquad
+              f(x)=\frac{1}{2\pi}\int_{-\infty}^{\infty}F(\omega)e^{i\omega
+              x}d\omega
+            </span>
+          </p>
+          <p>
+            Sine and cosine transforms, for
+            <span class="math inline">x&gt;0</span>:
+          </p>
+          <p>
+            <span class="math display">
+              F_s(\omega)=\int_0^\infty f(x)\sin(\omega x)dx, \qquad
+              f(x)=\frac{2}{\pi}\int_0^\infty F_s(\omega)\sin(\omega x)d\omega
+            </span>
+          </p>
+          <p>
+            <span class="math display">
+              F_c(\omega)=\int_0^\infty f(x)\cos(\omega x)dx, \qquad
+              f(x)=\frac{2}{\pi}\int_0^\infty F_c(\omega)\cos(\omega x)d\omega
+            </span>
+          </p>
+          <p>
+            What happens to the second derivative, the rule that makes
+            everything work:
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Transform</th>
+                <th><span class="math inline">u_{xx}</span> becomes</th>
+                <th>Needs</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="math inline">\mathcal F</span></td>
+                <td><span class="math inline">-\omega^2U</span></td>
+                <td>nothing</td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\mathcal F_s</span></td>
+                <td>
+                  <span class="math inline">-\omega^2U_s+\omega\,u(0,t)</span>
+                </td>
+                <td><span class="math inline">u(0,t)</span>, Dirichlet</td>
+              </tr>
+              <tr>
+                <td><span class="math inline">\mathcal F_c</span></td>
+                <td><span class="math inline">-\omega^2U_c-u_x(0,t)</span></td>
+                <td><span class="math inline">u_x(0,t)</span>, Neumann</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            The sine transform asks for <span class="math inline">u(0,t)</span>,
+            so it is the right one when the statement gives
+            <span class="math inline">u(0,t)</span>. Same with cosine and
+            <span class="math inline">u_x(0,t)</span>.
+          </p>
+          <p>
+            Derivatives in <span class="math inline">t</span> go through
+            untouched: <span class="math inline">\mathcal F\{u_t\}=U_t</span>.
+          </p>
+          <table>
+            <colgroup>
+              <col style="width: 50%" />
+              <col style="width: 50%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th><span class="math inline">f(x)</span></th>
+                <th><span class="math inline">F(\omega)</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="math inline">e^{-ax^2}</span></td>
+                <td>
+                  <span class="math inline"
+                    >\sqrt{\dfrac{\pi}{a}}\,e^{-\omega^2/(4a)}</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">e^{-a\lvert x\rvert}</span></td>
+                <td>
+                  <span class="math inline">\dfrac{2a}{a^2+\omega^2}</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="math inline">1</span> for
+                  <span class="math inline">\lvert x\rvert&lt;a</span>, else
+                  <span class="math inline">0</span>
+                </td>
+                <td>
+                  <span class="math inline"
+                    >\dfrac{2\sin(a\omega)}{\omega}</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td><span class="math inline">f(x-a)</span></td>
+                <td><span class="math inline">e^{-ia\omega}F(\omega)</span></td>
+              </tr>
+              <tr>
+                <td><span class="math inline">f*g</span></td>
+                <td><span class="math inline">F(\omega)G(\omega)</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <h2 id="heat-equation-on-the-whole-line">
+            4.3. Heat equation on the whole line
+          </h2>
+          <div class="flow">
+            <p><strong>PDE and initial condition</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle u_t=\alpha^2u_{xx},\quad
+                -\infty&lt;x&lt;\infty,\qquad u(x,0)=f(x)
+              </span>
+            </p>
+            <p>
+              Transform in <span class="math inline">x</span>, with
+              <span class="math inline">u_{xx}\to-\omega^2U</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle U_t=-\alpha^2\omega^2U,\qquad
+                U(\omega,0)=F(\omega)
+              </span>
+            </p>
+            <p>
+              <strong>ODE in <span class="math inline">t</span></strong
+              >, one for each <span class="math inline">\omega</span>,
+              separable:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle U(\omega,t)=F(\omega)\,e^{-\alpha^2\omega^2t}
+              </span>
+            </p>
+            <p>
+              A product in <span class="math inline">\omega</span> is a
+              convolution in <span class="math inline">x</span>. The Gaussian
+              row of the table with
+              <span class="math inline">a=\frac{1}{4\alpha^2t}</span> gives the
+              inverse of <span class="math inline">e^{-\alpha^2\omega^2t}</span>
+            </p>
+            <div class="sol">
+              <p>Solution</p>
+              <p>
+                <span class="math display">
+                  u(x,t)=\frac{1}{\sqrt{4\pi\alpha^2t}}\int_{-\infty}^{\infty}f(\xi)\,e^{-\frac{(x-\xi)^2}{4\alpha^2t}}d\xi
+                </span>
+              </p>
+            </div>
+          </div>
+          <div class="flow">
+            <p><strong>Worked example: Gaussian initial temperature</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle u_t=\alpha^2u_{xx},\qquad u(x,0)=e^{-x^2}
+              </span>
+            </p>
+            <p>
+              Transform the initial condition with the Gaussian row,
+              <span class="math inline">a=1</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle F(\omega)=\sqrt{\pi}\,e^{-\omega^2/4}
+              </span>
+            </p>
+            <p>
+              Multiply by
+              <span class="math inline">e^{-\alpha^2\omega^2t}</span> and join
+              the exponents:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle U=\sqrt{\pi}\,e^{-\omega^2\frac{1+4\alpha^2t}{4}}
+              </span>
+            </p>
+            <p>
+              It is again a Gaussian, with
+              <span class="math inline">a=\dfrac{1}{1+4\alpha^2t}</span>. Read
+              the table backwards
+            </p>
+            <div class="sol">
+              <p>Solution</p>
+              <p>
+                <span class="math display">
+                  u(x,t)=\frac{1}{\sqrt{1+4\alpha^2t}}\,e^{-\frac{x^2}{1+4\alpha^2t}}
+                </span>
+              </p>
+              <p>
+                At <span class="math inline">t=0</span> it gives back
+                <span class="math inline">e^{-x^2}</span>, then the bump spreads
+                and flattens
+              </p>
+            </div>
+          </div>
+          <h2 id="heat-equation-on-a-half-line">
+            4.4. Heat equation on a half line
+          </h2>
+          <div class="flow">
+            <p><strong>PDE with the end held at a fixed temperature</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle u_t=\alpha^2u_{xx},\quad x&gt;0,\qquad
+                u(0,t)=u_0,\quad u(x,0)=0
+              </span>
+            </p>
+            <p>
+              <span class="math inline">u(0,t)</span> is given, so use the sine
+              transform,
+              <span class="math inline">u_{xx}\to-\omega^2U+\omega u_0</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle U_t=-\alpha^2\omega^2U+\alpha^2\omega u_0,\qquad
+                U(\omega,0)=0
+              </span>
+            </p>
+            <p>
+              <strong
+                >First-order linear ODE in
+                <span class="math inline">t</span></strong
+              >, constant input:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle
+                U(\omega,t)=\frac{u_0}{\omega}\left(1-e^{-\alpha^2\omega^2t}\right)
+              </span>
+            </p>
+            <p>Invert with the sine formula:</p>
+            <p>
+              <span class="math display">
+                \displaystyle u=\frac{2u_0}{\pi}\int_0^\infty\frac{\sin(\omega
+                x)}{\omega}\left(1-e^{-\alpha^2\omega^2t}\right)d\omega
+              </span>
+            </p>
+            <p>
+              The first integral is
+              <span class="math inline">\frac{\pi}{2}</span>, the second is a
+              known error function
+            </p>
+            <div class="sol">
+              <p>Solution</p>
+              <p>
+                <span class="math display">
+                  u(x,t)=u_0\left[1-\operatorname{erf}\left(\frac{x}{2\alpha\sqrt
+                  t}\right)\right]
+                </span>
+              </p>
+              <p>
+                <span class="math inline"
+                  >\operatorname{erf}(z)=\frac{2}{\sqrt\pi}\int_0^ze^{-r^2}dr</span
+                >. Heat enters from the end and creeps inward
+              </p>
+            </div>
+          </div>
+          <p>
+            If instead the end is insulated,
+            <span class="math inline">u_x(0,t)=0</span>, use the cosine
+            transform and the boundary term vanishes:
+          </p>
+          <p>
+            <span class="math display">
+              u(x,t)=\frac{2}{\pi}\int_0^\infty
+              F_c(\omega)\,e^{-\alpha^2\omega^2t}\cos(\omega x)\,d\omega
+            </span>
+          </p>
+          <h2 id="wave-equation-on-the-whole-line">
+            4.5. Wave equation on the whole line
+          </h2>
+          <div class="flow">
+            <p><strong>PDE with initial shape and speed</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle u_{tt}=c^2u_{xx},\qquad u(x,0)=f(x),\quad
+                u_t(x,0)=g(x)
+              </span>
+            </p>
+            <p>Transform in <span class="math inline">x</span>:</p>
+            <p>
+              <span class="math display">
+                \displaystyle U_{tt}=-c^2\omega^2U
+              </span>
+            </p>
+            <p>
+              <strong
+                >Second-order ODE in <span class="math inline">t</span></strong
+              >, roots <span class="math inline">\pm ic\omega</span>:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle U=F(\omega)\cos(c\omega
+                t)+G(\omega)\frac{\sin(c\omega t)}{c\omega}
+              </span>
+            </p>
+            <p>
+              Write the cosine with Euler, each
+              <span class="math inline">e^{\pm ic\omega t}</span> is a shift of
+              <span class="math inline">\mp ct</span> in
+              <span class="math inline">x</span>
+            </p>
+            <div class="sol">
+              <p>Solution, d’Alembert</p>
+              <p>
+                <span class="math display">
+                  u(x,t)=\frac{f(x-ct)+f(x+ct)}{2}+\frac{1}{2c}\int_{x-ct}^{x+ct}g(\xi)\,d\xi
+                </span>
+              </p>
+              <p>
+                The initial shape splits into two halves travelling left and
+                right at speed <span class="math inline">c</span>
+              </p>
+            </div>
+          </div>
+          <h2 id="finite-bar-fourier-series">
+            4.6. Finite bar, Fourier series
+          </h2>
+          <p>
+            Use it when <span class="math inline">0&lt;x&lt;L</span> with both
+            ends fixed at zero.
+          </p>
+          <div class="flow">
+            <p><strong>Heat</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle u_t=\alpha^2u_{xx},\quad u(0,t)=u(L,t)=0,\quad
+                u(x,0)=f(x)
+              </span>
+            </p>
+            <p>
+              Separation <span class="math inline">u=X(x)T(t)</span> gives
+              <span class="math inline">X&#39;&#39;+\lambda X=0</span> with
+              <span class="math inline">X(0)=X(L)=0</span>, so:
+            </p>
+            <p>
+              <span class="math display">
+                \displaystyle X_n=\sin\frac{n\pi x}{L},\qquad
+                \lambda_n=\left(\frac{n\pi}{L}\right)^2
+              </span>
+            </p>
+            <p>
+              <span class="math inline">T&#39;=-\alpha^2\lambda_nT</span> gives
+              one decaying exponential per mode
+            </p>
+            <div class="sol">
+              <p>Solution</p>
+              <p>
+                <span class="math display">
+                  u=\sum_{n=1}^{\infty}b_n\,e^{-\left(\frac{n\pi\alpha}{L}\right)^2t}\sin\frac{n\pi
+                  x}{L}, \qquad b_n=\frac{2}{L}\int_0^Lf(x)\sin\frac{n\pi
+                  x}{L}dx
+                </span>
+              </p>
+            </div>
+          </div>
+          <div class="flow">
+            <p><strong>Wave</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle u_{tt}=c^2u_{xx},\quad u(0,t)=u(L,t)=0,\quad
+                u(x,0)=f,\ u_t(x,0)=g
+              </span>
+            </p>
+            <p>
+              Same <span class="math inline">X_n</span>, but
+              <span class="math inline">T&#39;&#39;=-c^2\lambda_nT</span>
+              oscillates
+            </p>
+            <div class="sol">
+              <p>Solution</p>
+              <p>
+                <span class="math display">
+                  u=\sum_{n=1}^{\infty}\left(A_n\cos\frac{n\pi
+                  ct}{L}+B_n\sin\frac{n\pi ct}{L}\right)\sin\frac{n\pi x}{L}
+                </span>
+              </p>
+              <p>
+                <span class="math display">
+                  A_n=\frac{2}{L}\int_0^Lf\sin\frac{n\pi x}{L}dx, \qquad
+                  B_n=\frac{2}{n\pi c}\int_0^Lg\sin\frac{n\pi x}{L}dx
+                </span>
+              </p>
+            </div>
+          </div>
+          <p>
+            Example of a coefficient: for
+            <span class="math inline">f(x)=100</span>,
+          </p>
+          <p>
+            <span class="math display">
+              b_n=\frac{200}{n\pi}\left(1-(-1)^n\right)=
+              \begin{cases}\dfrac{400}{n\pi}&amp;n\ \text{odd}\\0&amp;n\
+              \text{even}\end{cases}
+            </span>
+          </p>
+          <h2 id="practice-3">4.7. Practice</h2>
+          <p>
+            The help shrinks level by level. Try each exercise before opening
+            the answers.
+          </p>
+          <p>
+            <strong>Level 1: guided, set up the transformed problem</strong>
+          </p>
+          <ol type="1">
+            <li>
+              Transform <span class="math inline">u_t=2u_{xx}</span> on the
+              whole line.
+              <ul>
+                <li>
+                  <span class="math inline">u_t\to U_t</span> and
+                  <span class="math inline">u_{xx}\to-\omega^2U</span>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              Solve the transformed problem of
+              <span class="math inline">u_t=u_{xx}</span>,
+              <span class="math inline">u(x,0)=e^{-\lvert x\rvert}</span>, only
+              up to <span class="math inline">U(\omega,t)</span>.
+              <ul>
+                <li>
+                  <span class="math inline">U(\omega,0)</span> is the table row
+                  of <span class="math inline">e^{-a\lvert x\rvert}</span> with
+                  <span class="math inline">a=1</span>, then solve
+                  <span class="math inline">U_t=-\omega^2U</span>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              Which transform? (a) <span class="math inline">x&gt;0</span> with
+              <span class="math inline">u(0,t)=0</span>, (b)
+              <span class="math inline">x&gt;0</span> with
+              <span class="math inline">u_x(0,t)=0</span>, (c)
+              <span class="math inline">-\infty&lt;x&lt;\infty</span>, (d)
+              <span class="math inline">0&lt;x&lt;\pi</span> with both ends at
+              <span class="math inline">0</span>
+              <ul>
+                <li>Look at the table of 4.1.</li>
+              </ul>
+            </li>
+            <li>
+              Transform <span class="math inline">u_t=u_{xx}</span>,
+              <span class="math inline">x&gt;0</span>,
+              <span class="math inline">u(0,t)=0</span> with the sine transform.
+              <ul>
+                <li>
+                  <span class="math inline"
+                    >u_{xx}\to-\omega^2U+\omega u(0,t)</span
+                  >.
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 1</summary>
+            <ol type="1">
+              <li><span class="math inline">U_t=-2\omega^2U</span></li>
+              <li>
+                <span class="math inline"
+                  >U=\dfrac{2}{1+\omega^2}e^{-\omega^2t}</span
+                >
+              </li>
+              <li>
+                <ol type="a">
+                  <li>sine, (b) cosine, (c) Fourier, (d) Fourier series</li>
+                </ol>
+              </li>
+              <li>
+                <span class="math inline">U_t=-\omega^2U</span>, the boundary
+                term vanishes because <span class="math inline">u(0,t)=0</span>
+              </li>
+            </ol>
+          </details>
+          <p><strong>Level 2: one hint each, whole line</strong></p>
+          <ol start="5" type="1">
+            <li>
+              <span class="math inline">u_t=u_{xx},\quad u(x,0)=e^{-x^2}</span>
+              <ul>
+                <li>
+                  The worked example of 4.3 with
+                  <span class="math inline">\alpha=1</span>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline">u_t=4u_{xx},\quad u(x,0)=e^{-x^2}</span>
+              <ul>
+                <li>Same, with <span class="math inline">\alpha^2=4</span>.</li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline"
+                >u_{tt}=u_{xx},\quad u(x,0)=e^{-x^2},\ u_t(x,0)=0</span
+              >
+              <ul>
+                <li>
+                  d’Alembert with <span class="math inline">c=1</span> and
+                  <span class="math inline">g=0</span>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <span class="math inline"
+                >u_{tt}=4u_{xx},\quad u(x,0)=0,\ u_t(x,0)=\cos x</span
+              >
+              <ul>
+                <li>
+                  d’Alembert with <span class="math inline">c=2</span> and
+                  <span class="math inline">f=0</span>, integrate the cosine.
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 2</summary>
+            <ol start="5" type="1">
+              <li>
+                <span class="math inline"
+                  >u=\dfrac{1}{\sqrt{1+4t}}e^{-\frac{x^2}{1+4t}}</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >u=\dfrac{1}{\sqrt{1+16t}}e^{-\frac{x^2}{1+16t}}</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >u=\dfrac{1}{2}\left[e^{-(x-t)^2}+e^{-(x+t)^2}\right]</span
+                >
+              </li>
+              <li>
+                <span class="math inline">u=\dfrac{1}{2}\cos x\,\sin(2t)</span>
+              </li>
+            </ol>
+          </details>
+          <p><strong>Level 3: one word, half line and finite bar</strong></p>
+          <ol start="9" type="1">
+            <li>
+              <span class="math inline"
+                >u_t=u_{xx},\ x&gt;0,\quad u(0,t)=0,\ u(x,0)=e^{-x}</span
+              >
+              (sine)
+            </li>
+            <li>
+              <span class="math inline"
+                >u_t=u_{xx},\ x&gt;0,\quad u(0,t)=5,\ u(x,0)=0</span
+              >
+              (erf)
+            </li>
+            <li>
+              <span class="math inline"
+                >u_t=u_{xx},\ x&gt;0,\quad u_x(0,t)=0,\ u(x,0)=e^{-x}</span
+              >
+              (cosine)
+            </li>
+            <li>
+              <span class="math inline"
+                >u_t=u_{xx},\ 0&lt;x&lt;\pi,\quad u(0,t)=u(\pi,t)=0,\
+                u(x,0)=3\sin x-\sin(4x)</span
+              >
+              (series)
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 3</summary>
+            <ol start="9" type="1">
+              <li>
+                <span class="math inline"
+                  >u=\dfrac{2}{\pi}\displaystyle\int_0^\infty\frac{\omega}{1+\omega^2}e^{-\omega^2t}\sin(\omega
+                  x)\,d\omega</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >u=5\left[1-\operatorname{erf}\left(\dfrac{x}{2\sqrt
+                  t}\right)\right]</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >u=\dfrac{2}{\pi}\displaystyle\int_0^\infty\frac{1}{1+\omega^2}e^{-\omega^2t}\cos(\omega
+                  x)\,d\omega</span
+                >
+              </li>
+              <li>
+                <span class="math inline">u=3e^{-t}\sin x-e^{-16t}\sin(4x)</span
+                >, the initial condition is already a sum of modes
+              </li>
+            </ol>
+          </details>
+          <p><strong>Level 4: no help</strong></p>
+          <ol start="13" type="1">
+            <li>
+              <span class="math inline"
+                >u_t=2u_{xx},\quad u(x,0)=e^{-x^2/4}</span
+              >
+            </li>
+            <li>
+              <span class="math inline"
+                >u_{tt}=9u_{xx},\quad u(x,0)=\dfrac{1}{1+x^2},\ u_t(x,0)=0</span
+              >
+            </li>
+            <li>
+              <span class="math inline"
+                >u_t=u_{xx},\ 0&lt;x&lt;1,\quad u(0,t)=u(1,t)=0,\
+                u(x,0)=100</span
+              >
+            </li>
+            <li>
+              <span class="math inline">u_t=u_{xx},\quad u(x,0)=1</span> for
+              <span class="math inline">\lvert x\rvert&lt;1</span>,
+              <span class="math inline">0</span> otherwise
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 4</summary>
+            <ol start="13" type="1">
+              <li>
+                <span class="math inline"
+                  >u=\dfrac{1}{\sqrt{1+2t}}e^{-\frac{x^2}{4(1+2t)}}</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >u=\dfrac{1}{2}\left[\dfrac{1}{1+(x-3t)^2}+\dfrac{1}{1+(x+3t)^2}\right]</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >u=\displaystyle\sum_{n\
+                  \text{odd}}\frac{400}{n\pi}e^{-n^2\pi^2t}\sin(n\pi x)</span
+                >
+              </li>
+              <li>
+                <span class="math inline"
+                  >u=\dfrac{1}{2}\left[\operatorname{erf}\left(\dfrac{x+1}{2\sqrt
+                  t}\right)-\operatorname{erf}\left(\dfrac{x-1}{2\sqrt
+                  t}\right)\right]</span
+                >, from the convolution formula of 4.3
+              </li>
+            </ol>
+          </details>
+        </details>
+        <hr />
+        <details>
+          <summary>
+            <h1 id="ode-systems-in-python">5. ODE SYSTEMS IN PYTHON</h1>
+          </summary>
+          <p>
+            Only <code>numpy</code> and <code>matplotlib</code>. The same three
+            blocks cover any IVP they can ask: write
+            <span class="math inline">f</span>, solve, plot.
+          </p>
+          <h2 id="recipe-1">5.1. Recipe</h2>
+          <ol type="1">
+            <li>
+              Write the system as
+              <span class="math inline">\mathbf x&#39;=f(t,\mathbf x)</span>,
+              one line per unknown.
+            </li>
+            <li>
+              Code <code>f(t, x)</code> returning a <code>np.array</code> with
+              the derivatives, in the same order as the unknowns.
+            </li>
+            <li>Solve with <code>rk4</code> on a grid of times.</li>
+            <li>
+              Plot every unknown against <span class="math inline">t</span>.
+              With two unknowns, also one against the other (phase plane).
+            </li>
+            <li>
+              Interpret: equilibrium, long-term limit, peaks, oscillations.
+            </li>
+          </ol>
+          <h2 id="the-solver-runge-kutta-4">5.2. The solver: Runge-Kutta 4</h2>
+          <p>
+            The idea is Euler, walk along the slope in small steps
+            <span class="math inline">h</span>:
+          </p>
+          <p>
+            <span class="math display">
+              \mathbf x_{n+1}=\mathbf x_n+h\,f(t_n,\mathbf x_n)
+            </span>
+          </p>
+          <p>
+            RK4 does the same, but averages four slopes per step, so it is
+            accurate with few steps:
+          </p>
+          <p>
+            <span class="math display">
+              \mathbf x_{n+1}=\mathbf
+              x_n+\frac{h}{6}\left(k_1+2k_2+2k_3+k_4\right)
+            </span>
+          </p>
+          <div class="sourceCode" id="cb1">
+            <pre
+              class="sourceCode python"
+            ><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rk4(f, x0, t):</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> np.zeros((<span class="bu">len</span>(t), <span class="bu">len</span>(x0)))  <span class="co"># one row per time, one column per unknown</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    x[<span class="dv">0</span>] <span class="op">=</span> x0</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(t) <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        h <span class="op">=</span> t[i <span class="op">+</span> <span class="dv">1</span>] <span class="op">-</span> t[i]</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        k1 <span class="op">=</span> f(t[i], x[i])</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        k2 <span class="op">=</span> f(t[i] <span class="op">+</span> h <span class="op">/</span> <span class="dv">2</span>, x[i] <span class="op">+</span> h <span class="op">/</span> <span class="dv">2</span> <span class="op">*</span> k1)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        k3 <span class="op">=</span> f(t[i] <span class="op">+</span> h <span class="op">/</span> <span class="dv">2</span>, x[i] <span class="op">+</span> h <span class="op">/</span> <span class="dv">2</span> <span class="op">*</span> k2)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        k4 <span class="op">=</span> f(t[i] <span class="op">+</span> h, x[i] <span class="op">+</span> h <span class="op">*</span> k3)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        x[i <span class="op">+</span> <span class="dv">1</span>] <span class="op">=</span> x[i] <span class="op">+</span> h <span class="op">/</span> <span class="dv">6</span> <span class="op">*</span> (k1 <span class="op">+</span> <span class="dv">2</span> <span class="op">*</span> k2 <span class="op">+</span> <span class="dv">2</span> <span class="op">*</span> k3 <span class="op">+</span> k4)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x</span></code></pre>
+          </div>
+          <p>
+            Copy this function as is into every exercise. A single equation is a
+            system with one unknown: <code>x0 = [10]</code> and
+            <code>f</code> returns <code>np.array([...])</code> with one value.
+          </p>
+          <h2 id="linear-system-two-tanks">5.3. Linear system: two tanks</h2>
+          <div class="flow">
+            <p><strong>System</strong></p>
+            <p>
+              <span class="math display">
+                \displaystyle x_1&#39;=-0.02x_1,\quad
+                x_2&#39;=0.02x_1-0.02x_2,\quad x_1(0)=50,\ x_2(0)=0
+              </span>
+            </p>
+          </div>
+          <div class="sourceCode" id="cb2">
+            <pre
+              class="sourceCode python"
+            ><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tanks(t, x):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    x1, x2 <span class="op">=</span> x</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([<span class="op">-</span><span class="fl">0.02</span> <span class="op">*</span> x1, <span class="fl">0.02</span> <span class="op">*</span> x1 <span class="op">-</span> <span class="fl">0.02</span> <span class="op">*</span> x2])</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">300</span>, <span class="dv">601</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> rk4(tanks, [<span class="dv">50</span>, <span class="dv">0</span>], t)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>x1, x2 <span class="op">=</span> x[:, <span class="dv">0</span>], x[:, <span class="dv">1</span>]  <span class="co"># column j is unknown j</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>plt.plot(t, x1, label<span class="op">=</span><span class="st">&quot;tank A&quot;</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>plt.plot(t, x2, label<span class="op">=</span><span class="st">&quot;tank B&quot;</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>plt.plot(t, t <span class="op">*</span> np.exp(<span class="op">-</span><span class="fl">0.02</span> <span class="op">*</span> t), <span class="st">&quot;k--&quot;</span>, label<span class="op">=</span><span class="st">&quot;B exact&quot;</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">&quot;t (min)&quot;</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">&quot;salt (kg)&quot;</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>plt.grid()</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>i <span class="op">=</span> np.argmax(x2)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;B peaks at t=</span><span class="sc">{</span>t[i]<span class="sc">:.1f}</span><span class="ss"> min with </span><span class="sc">{</span>x2[i]<span class="sc">:.2f}</span><span class="ss"> kg&quot;</span>)</span></code></pre>
+          </div>
+          <p>
+            Output: <code>B peaks at t=50.0 min with 18.39 kg</code>. The dashed
+            exact solution <span class="math inline">x_2=te^{-0.02t}</span> from
+            Laplace lies on top of the numerical one.
+          </p>
+          <h2 id="exact-solution-with-eigenvalues">
+            5.4. Exact solution with eigenvalues
+          </h2>
+          <p>
+            For a linear system
+            <span class="math inline">\mathbf x&#39;=A\mathbf x</span> the
+            solution is a sum of exponentials, and <code>numpy</code> finds
+            them:
+          </p>
+          <p>
+            <span class="math display">
+              \mathbf x(t)=\sum_i c_i\,e^{\lambda_it}\,\mathbf v_i, \qquad
+              V\mathbf c=\mathbf x(0)
+            </span>
+          </p>
+          <div class="sourceCode" id="cb3">
+            <pre
+              class="sourceCode python"
+            ><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>A <span class="op">=</span> np.array([[<span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.0</span>], [<span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.2</span>]])  <span class="co"># drug: gut -&gt; blood</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>x0 <span class="op">=</span> np.array([<span class="fl">100.0</span>, <span class="fl">0.0</span>])</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>lam, V <span class="op">=</span> np.linalg.eig(A)  <span class="co"># eigenvalues, eigenvectors as columns</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> np.linalg.solve(V, x0)  <span class="co"># constants from the initial condition</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> exact(t):</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ((V <span class="op">*</span> np.exp(lam <span class="op">*</span> t)) <span class="op">@</span> c).real  <span class="co"># eig may return complex dtype</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;eigenvalues:&quot;</span>, lam.real)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;x(3) =&quot;</span>, exact(<span class="fl">3.0</span>))</span></code></pre>
+          </div>
+          <p>
+            Output: <code>eigenvalues: [-0.2 -0.5]</code> and
+            <code>x(3) = [22.31301601 54.28024599]</code>. It needs distinct
+            eigenvalues, with a repeated one (the two tanks) use
+            <code>rk4</code>.
+          </p>
+          <p>The eigenvalues also predict the plot without solving anything:</p>
+          <table>
+            <colgroup>
+              <col style="width: 50%" />
+              <col style="width: 50%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Eigenvalues of <span class="math inline">A</span></th>
+                <th>Behavior</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Real and negative</td>
+                <td>
+                  Decays to <span class="math inline">0</span> without
+                  oscillating
+                </td>
+              </tr>
+              <tr>
+                <td>Complex, negative real part</td>
+                <td>Decaying oscillation, spiral in the phase plane</td>
+              </tr>
+              <tr>
+                <td>Pure imaginary</td>
+                <td>Oscillation that never decays, closed orbits</td>
+              </tr>
+              <tr>
+                <td>Some positive real part</td>
+                <td>Grows without bound</td>
+              </tr>
+            </tbody>
+          </table>
+          <h2 id="nonlinear-system-predator-prey-and-phase-plane">
+            5.5. Nonlinear system: predator-prey and phase plane
+          </h2>
+          <div class="sourceCode" id="cb4">
+            <pre
+              class="sourceCode python"
+            ><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>a, b, c, d <span class="op">=</span> <span class="fl">1.0</span>, <span class="fl">0.1</span>, <span class="fl">1.5</span>, <span class="fl">0.075</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lotka(t, z):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> z</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([a <span class="op">*</span> x <span class="op">-</span> b <span class="op">*</span> x <span class="op">*</span> y, <span class="op">-</span>c <span class="op">*</span> y <span class="op">+</span> d <span class="op">*</span> x <span class="op">*</span> y])</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">30</span>, <span class="dv">3001</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> rk4(lotka, [<span class="dv">10</span>, <span class="dv">5</span>], t)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>x, y <span class="op">=</span> z[:, <span class="dv">0</span>], z[:, <span class="dv">1</span>]</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>fig, (ax1, ax2) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>ax1.plot(t, x, label<span class="op">=</span><span class="st">&quot;prey&quot;</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>ax1.plot(t, y, label<span class="op">=</span><span class="st">&quot;predators&quot;</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>ax1.set_xlabel(<span class="st">&quot;t&quot;</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>ax1.legend()</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>ax2.plot(x, y)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>ax2.plot(c <span class="op">/</span> d, a <span class="op">/</span> b, <span class="st">&quot;ro&quot;</span>, label<span class="op">=</span><span class="st">&quot;equilibrium&quot;</span>)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>ax2.set_xlabel(<span class="st">&quot;prey&quot;</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>ax2.set_ylabel(<span class="st">&quot;predators&quot;</span>)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>ax2.legend()</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre>
+          </div>
+          <p>
+            The equilibrium comes from <span class="math inline">f=0</span>:
+            <span class="math inline">x=\dfrac{c}{d}=20</span>,
+            <span class="math inline">y=\dfrac{a}{b}=10</span>. The orbit is a
+            closed loop around it.
+          </p>
+          <h2 id="if-scipy-is-allowed">
+            5.6. If <code>scipy</code> is allowed
+          </h2>
+          <p>
+            <code>solve_ivp</code> replaces <code>rk4</code>. Same
+            <code>f</code>, but the result comes transposed: one row per
+            unknown.
+          </p>
+          <div class="sourceCode" id="cb5">
+            <pre
+              class="sourceCode python"
+            ><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.integrate <span class="im">import</span> solve_ivp</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>sol <span class="op">=</span> solve_ivp(tanks, (<span class="dv">0</span>, <span class="dv">300</span>), [<span class="dv">50</span>, <span class="dv">0</span>], t_eval<span class="op">=</span>t)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>x1, x2 <span class="op">=</span> sol.y</span></code></pre>
+          </div>
+          <h2 id="interpreting-the-plots">5.7. Interpreting the plots</h2>
+          <table>
+            <colgroup>
+              <col style="width: 50%" />
+              <col style="width: 50%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>What you see</th>
+                <th>What to write</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Curves settle to constants</td>
+                <td>
+                  Equilibrium, confirm it by solving
+                  <span class="math inline">f(\mathbf x)=0</span>
+                </td>
+              </tr>
+              <tr>
+                <td>A curve rises then falls</td>
+                <td>
+                  Intermediate stage (tank B, drug in blood), peak with
+                  <code>np.argmax</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Repeating oscillations</td>
+                <td>Cycle, predators lag behind prey</td>
+              </tr>
+              <tr>
+                <td>Closed loop in the phase plane</td>
+                <td>Periodic solution around the equilibrium</td>
+              </tr>
+              <tr>
+                <td>Blow-up</td>
+                <td>
+                  Unstable model or a sign mistake in
+                  <span class="math inline">f</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            Before handing in: the plot starts at the initial conditions, the
+            axes have the units of the statement, and conserved quantities stay
+            constant (total salt, <span class="math inline">A+B+C</span>,
+            <span class="math inline">S+I+R</span>).
+          </p>
+          <h2 id="practice-4">5.8. Practice</h2>
+          <p>
+            Every exercise is the <code>rk4</code> function plus a new
+            <code>f</code>. The help shrinks level by level.
+          </p>
+          <p><strong>Level 1: guided, one equation</strong></p>
+          <ol type="1">
+            <li>
+              Solve <span class="math inline">x&#39;=2-0.04x</span>,
+              <span class="math inline">x(0)=10</span> on
+              <span class="math inline">[0,100]</span> and print
+              <span class="math inline">x(50)</span>.
+              <ul>
+                <li>
+                  <code>f</code> returns
+                  <code>np.array([2 - 0.04 * x[0]])</code>, and
+                  <code>x0 = [10]</code>.
+                </li>
+                <li>
+                  With <code>t = np.linspace(0, 100, 1001)</code>,
+                  <span class="math inline">t=50</span> is index 500.
+                </li>
+              </ul>
+            </li>
+            <li>
+              Plot the logistic
+              <span class="math inline">P&#39;=0.1P(1-P/1000)</span>,
+              <span class="math inline">P(0)=100</span> on
+              <span class="math inline">[0,100]</span> and say where it levels
+              off.
+              <ul>
+                <li>Same structure, the curve tends to the capacity.</li>
+              </ul>
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 1</summary>
+            <ol type="1">
+              <li>
+                <code>x(50) = 44.5866</code>, the exact value is
+                <span class="math inline">50-40e^{-2}=44.5866</span>
+              </li>
+              <li>
+                It levels off at <span class="math inline">P=1000</span>, the
+                carrying capacity
+              </li>
+            </ol>
+          </details>
+          <p><strong>Level 2: one hint each, systems</strong></p>
+          <ol start="3" type="1">
+            <li>
+              The drug <span class="math inline">g&#39;=-0.5g</span>,
+              <span class="math inline">b&#39;=0.5g-0.2b</span>,
+              <span class="math inline">g(0)=100</span>,
+              <span class="math inline">b(0)=0</span> on
+              <span class="math inline">[0,24]</span>: when does the blood peak,
+              and how much?
+              <ul>
+                <li><code>np.argmax</code> on the blood column.</li>
+              </ul>
+            </li>
+            <li>
+              Eigenvalues of <span class="math inline">x&#39;=y</span>,
+              <span class="math inline">y&#39;=-x-0.5y</span>: what does the
+              phase plane look like?
+              <ul>
+                <li>
+                  <span class="math inline"
+                    >A=\begin{pmatrix}0&amp;1\\-1&amp;-0.5\end{pmatrix}</span
+                  >, then <code>np.linalg.eig</code>.
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 2</summary>
+            <ol start="3" type="1">
+              <li>
+                Peak at <span class="math inline">t\approx3.05</span> h with
+                <span class="math inline">b\approx54.3</span> mg
+              </li>
+              <li>
+                <span class="math inline">\lambda=-0.25\pm0.968i</span>, complex
+                with negative real part: a decaying spiral
+              </li>
+            </ol>
+          </details>
+          <p><strong>Level 3: one word, interpret</strong></p>
+          <ol start="5" type="1">
+            <li>
+              SIR with <span class="math inline">S(0)=999</span>,
+              <span class="math inline">I(0)=1</span>,
+              <span class="math inline">R(0)=0</span>,
+              <span class="math inline">\beta=0.0005</span>,
+              <span class="math inline">\gamma=0.1</span> on
+              <span class="math inline">[0,100]</span>: day and size of the peak
+              of infected (argmax)
+            </li>
+            <li>
+              The same SIR: check that the total stays at 1000 (conservation)
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 3</summary>
+            <ol start="5" type="1">
+              <li>Peak around day 21 with about 478 infected</li>
+              <li>
+                <code>S + I + R</code> stays at 1000 for every
+                <span class="math inline">t</span>, the three derivatives add up
+                to <span class="math inline">0</span>
+              </li>
+            </ol>
+          </details>
+          <p><strong>Level 4: no help</strong></p>
+          <ol start="7" type="1">
+            <li>
+              Recirculating tanks
+              <span class="math inline">x_1&#39;=-0.06x_1+0.02x_2</span>,
+              <span class="math inline">x_2&#39;=0.06x_1-0.06x_2</span>,
+              <span class="math inline">x_1(0)=20</span>,
+              <span class="math inline">x_2(0)=0</span>: plot both, find the
+              eigenvalues and describe the long term
+            </li>
+          </ol>
+          <details>
+            <summary>Answers, level 4</summary>
+            <ol start="7" type="1">
+              <li>
+                <span class="math inline">\lambda\approx-0.025</span> and
+                <span class="math inline">-0.095</span>, both real and negative:
+                all the salt drains out without oscillating, tank B rises first
+                and then empties
+              </li>
+            </ol>
+          </details>
+        </details>
+      </main>
+    </div>
+
+    <script>
+      const topics = [...document.querySelectorAll("main > details")];
+      const tabs = [...document.querySelectorAll("nav.topics a")];
+      const toc = document.getElementById("toc");
+
+      function show() {
+        // The hash can point at a topic or at anything inside one: show the topic that contains it
+        const target = document.getElementById(location.hash.slice(1));
+        const current = target?.closest("main > details") ?? topics[0];
+        topics.forEach((d) => (d.hidden = d !== current));
+        current.open = true;
+
+        const id = current.querySelector("h1").id;
+        tabs.forEach((a) => a.classList.toggle("active", a.hash === "#" + id));
+
+        // Side index: the h2 sections of the visible topic
+        toc.replaceChildren(
+          ...[...current.querySelectorAll(":scope > h2")].map((h) => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.href = "#" + h.id;
+            a.textContent = h.textContent;
+            li.append(a);
+            return li;
+          }),
+        );
+
+        if (!target || target.id === id) window.scrollTo(0, 0);
+      }
+
+      window.addEventListener("hashchange", show);
+      show();
+    </script>
+  </body>
+</html>

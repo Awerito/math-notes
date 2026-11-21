@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="$lang$">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>$pagetitle$</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="notes.css" />
+    $math$
+  </head>
+  <body>
+    <header class="bar">
+      <a class="brand" href="#">$title$</a>
+      <nav class="topics">
+        <a href="#modeling-with-odes"><b>1</b> Modeling</a>
+        <a href="#laplace-transform"><b>2</b> Laplace</a>
+        <a href="#fourier-transform"><b>3</b> Fourier</a>
+        <a href="#fourier-for-pdes"><b>4</b> PDEs</a>
+        <a href="#ode-systems-in-python"><b>5</b> Python</a>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <aside class="toc">
+        <p class="toc-label">On this page</p>
+        <ol id="toc"></ol>
+      </aside>
+      <main>$body$</main>
+    </div>
+
+    <script>
+      const topics = [...document.querySelectorAll("main > details")];
+      const tabs = [...document.querySelectorAll("nav.topics a")];
+      const toc = document.getElementById("toc");
+
+      function show() {
+        // The hash can point at a topic or at anything inside one: show the topic that contains it
+        const target = document.getElementById(location.hash.slice(1));
+        const current = target?.closest("main > details") ?? topics[0];
+        topics.forEach((d) => (d.hidden = d !== current));
+        current.open = true;
+
+        const id = current.querySelector("h1").id;
+        tabs.forEach((a) => a.classList.toggle("active", a.hash === "#" + id));
+
+        // Side index: the h2 sections of the visible topic
+        toc.replaceChildren(
+          ...[...current.querySelectorAll(":scope > h2")].map((h) => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.href = "#" + h.id;
+            a.textContent = h.textContent;
+            li.append(a);
+            return li;
+          }),
+        );
+
+        if (!target || target.id === id) window.scrollTo(0, 0);
+      }
+
+      window.addEventListener("hashchange", show);
+      show();
+    </script>
+  </body>
+</html>

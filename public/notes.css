@@ -1,0 +1,212 @@
+/* Layout for the exam page, on top of style.css (tokens and components) */
+
+body {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+}
+
+/* ---------- Top bar ---------- */
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0.9rem 2rem;
+  background: var(--bg);
+  border-bottom: 4px solid var(--pink);
+}
+
+.brand {
+  flex: none;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+nav.topics {
+  display: flex;
+  gap: 0.7rem;
+  overflow-x: auto;
+  margin-left: auto;
+}
+
+nav.topics a {
+  flex: none;
+  padding: 0.4rem 0.9rem;
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+nav.topics a b {
+  color: var(--pink);
+  margin-right: 0.3rem;
+}
+
+nav.topics a:hover {
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+nav.topics a.active {
+  background: var(--pink);
+  color: var(--bg);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+nav.topics a.active b {
+  color: var(--bg);
+}
+
+/* ---------- Two columns: side index + content ---------- */
+
+.layout {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  gap: 3.5rem;
+  max-width: 92rem;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 6rem;
+}
+
+.toc {
+  position: sticky;
+  top: 5.5rem;
+  align-self: start;
+  max-height: calc(100vh - 7rem);
+  overflow-y: auto;
+  border: var(--border);
+  box-shadow: var(--shadow);
+  background: var(--surface);
+  padding: 1rem 1.1rem;
+}
+
+.toc-label {
+  margin: 0 0 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc li + li {
+  border-top: 1px solid var(--line);
+}
+
+.toc a {
+  display: block;
+  padding: 0.45rem 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.toc a:hover {
+  color: var(--pink);
+}
+
+main {
+  min-width: 0;
+}
+
+/* Section headings jump below the sticky bar */
+main h1,
+main h2 {
+  scroll-margin-top: 6rem;
+}
+
+/* ---------- Topics: always open, the summary is only a heading ---------- */
+
+main > details > summary {
+  list-style: none;
+  pointer-events: none;
+}
+
+main > details > summary::-webkit-details-marker {
+  display: none;
+}
+
+main > details > summary h1 {
+  margin-top: 0;
+  font-size: 1.6rem;
+}
+
+main > hr {
+  display: none;
+}
+
+/* Topics never fold here, so style.css's +/− marker on unit titles is noise */
+main > details > summary:has(h1)::before {
+  display: none;
+}
+
+/* Practice answers use style.css's answer card as is */
+
+/* ---------- Code blocks as one card; style.css's inline `code` must not reach their lines ---------- */
+
+div.sourceCode,
+pre {
+  background: var(--surface);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  margin: 1.5rem 0 2.5rem;
+  overflow-x: auto;
+}
+
+pre {
+  padding: 1rem 1.2rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+div.sourceCode pre {
+  border: 0;
+  box-shadow: none;
+  margin: 0;
+}
+
+pre code {
+  display: block;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+/* ---------- Phones and narrow windows: one column, no side index ---------- */
+
+@media (max-width: 900px) {
+  .bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+    padding: 0.8rem 1rem;
+  }
+
+  nav.topics {
+    margin-left: 0;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 1.5rem 1rem 4rem;
+  }
+
+  .toc {
+    display: none;
+  }
+}
