@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="$lang$">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>$pagetitle$</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="notes.css" />
+    <style>
+      /* Multiple choice alternatives read "A)" as in the official booklet */
+      ol[type="A"] > li::marker {
+        content: counter(list-item, upper-alpha) ") ";
+      }
+      footer.sources {
+        max-width: 92rem;
+        margin: 0 auto;
+        padding: 1.5rem 2rem 3rem;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.75rem;
+      }
+      footer.sources a {
+        color: var(--muted);
+      }
+    </style>
+    $math$
+  </head>
+  <body>
+    <header class="bar">
+      <a class="brand" href="#">$title$</a>
+      <nav class="topics">
+        <a href="#numeros"><b>1</b> Números</a>
+        <a href="#algebra"><b>2</b> Álgebra</a>
+        <a href="#funciones"><b>3</b> Funciones</a>
+        <a href="#geometria"><b>4</b> Geometría</a>
+        <a href="#probabilidad-y-estadistica"><b>5</b> Datos y azar</a>
+        <a href="#la-prueba"><b>6</b> La prueba</a>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <aside class="toc">
+        <p class="toc-label">En esta página</p>
+        <ol id="toc"></ol>
+      </aside>
+      <main>$body$</main>
+    </div>
+
+    <footer class="sources">
+      Fuentes:
+      <a
+        href="https://demre.cl/publicaciones/pdf/2027-26-03-19-temario-paes-regular-m1.pdf"
+        >Temario M1 Admisión 2027</a
+      >,
+      <a
+        href="https://demre.cl/publicaciones/pdf/2027-26-03-19-temario-paes-regular-m2.pdf"
+        >Temario M2 Admisión 2027</a
+      >,
+      <a
+        href="https://demre.cl/publicaciones/pdf/2025-24-12-02-paes-regular-matematica2-p2025.pdf"
+        >Selección de preguntas M2 2025</a
+      >,
+      <a
+        href="https://demre.cl/publicaciones/pdf/2024-23-11-29-paes-regular-oficial-matematica1-p2024.pdf"
+        >PAES M1 2024 oficial</a
+      >,
+      <a
+        href="https://campus.cdsprovidencia.cl/pluginfile.php/70/mod_label/intro/F13_8BMAT.pdf"
+        >Guía de percentiles 8° básico</a
+      >,
+      <a
+        href="https://www.24horas.cl/te-sirve/publican-temarios-paes-regular-2026-demre"
+        >24horas, publicación de temarios</a
+      >
+    </footer>
+
+    <script>
+      const topics = [...document.querySelectorAll("main > details")];
+      const tabs = [...document.querySelectorAll("nav.topics a")];
+      const toc = document.getElementById("toc");
+
+      function show() {
+        // The hash can point at a topic or at anything inside one: show the topic that contains it
+        const target = document.getElementById(
+          decodeURIComponent(location.hash.slice(1)),
+        );
+        const current = target?.closest("main > details") ?? topics[0];
+        topics.forEach((d) => (d.hidden = d !== current));
+        current.open = true;
+
+        const id = current.querySelector("h1").id;
+        tabs.forEach((a) => a.classList.toggle("active", a.hash === "#" + id));
+
+        // Side index: the h2 sections of the visible topic
+        toc.replaceChildren(
+          ...[...current.querySelectorAll(":scope > h2")].map((h) => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.href = "#" + h.id;
+            a.textContent = h.textContent;
+            li.append(a);
+            return li;
+          }),
+        );
+
+        if (!target || target.id === id) window.scrollTo(0, 0);
+      }
+
+      window.addEventListener("hashchange", show);
+      show();
+    </script>
+  </body>
+</html>
